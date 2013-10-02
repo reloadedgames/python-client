@@ -1,7 +1,7 @@
 import binascii
 import os
 
-path = 'C:\Users\lmcnearney\Downloads\Package'
+path = 'C:\Users\lmcnearney\Downloads\Package\\'
 chunk_size = 1048576
 
 if not os.path.isdir(path):
@@ -9,10 +9,10 @@ if not os.path.isdir(path):
 
 for root, dirs, files in os.walk(path):
     for name in files:
-        path = os.path.join(root, name)
-        print path
+        file_path = os.path.join(root, name)
+        print file_path.replace(path, '')
 
-        with open(path, 'r+b') as f:
+        with open(file_path, 'r+b') as f:
             part = 0
             chunk = f.read(chunk_size)
 
