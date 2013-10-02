@@ -1,21 +1,27 @@
 import binascii
 import os
 
-# Parameters
-current_path = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(current_path, 'checksum.txt')
-chunk_size = 8192
+path = 'C:\Users\lmcnearney\Downloads\Package'
+chunk_size = 1048576
 
-with open(file_path, 'r+b') as f:
-    chunk = f.read(chunk_size)
+if not os.path.isdir(path):
+    exit('You must specify a directory')
 
-    while chunk:
-        # Perform CRC
-        length = chunk.__len__()
-        crc = binascii.crc32(chunk) & 0xffffffff
+for root, dirs, files in os.walk(path):
+    for name in files:
+        path = os.path.join(root, name)
+        print path
 
-        print 'Length = {0}'.format(length)
-        print 'CRC = {0} = {0:x}'.format(crc)
+        with open(path, 'r+b') as f:
+            part = 0
+            chunk = f.read(chunk_size)
 
-        # Next chunk
-        chunk = f.read(chunk_size)
+            while chunk:
+                part += 1
+                length = chunk.__len__()
+                crc = binascii.crc32(chunk) & 0xffffffff
+                print 'Part = {0}, Length = {1}, CRC = {2}, Hex = {2:x}'.format(part, length, crc)
+
+                chunk = f.read(chunk_size)
+
+        print ''
