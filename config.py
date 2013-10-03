@@ -18,14 +18,18 @@ Configurations are stored in your home folder under the file: ~/.package.config
 """
 
 from collections import namedtuple
+from ConfigParser import SafeConfigParser
 from docopt import docopt
-import ConfigParser
+
 import getpass
 import os
 import requests
 
 
 class ConfigCommand:
+
+    # The full path for the config file
+    _path = os.path.expanduser('~/package.config')
 
     def __init__(self):
         pass
@@ -74,7 +78,12 @@ class ConfigCommand:
             partner_id = partners[i].PartnerId
 
         print 'Saving configuration...'
-        self.save(email, password, url, partner_id)
+        self.save({
+            'email': email,
+            'password': password,
+            'url': url,
+            'partner_id': partner_id
+        })
 
     @staticmethod
     def get_partners(email, password, url):
@@ -90,22 +99,31 @@ class ConfigCommand:
         return [partner(p['PartnerId'], p['Name']) for p in response.json()]
 
     @staticmethod
-    def save(email, password, url, partner_id):
+    def save(values):
         """
         Saves the configuration settings to the ~/package.config file
         """
-        path = '~/package.config'
-        full_path = os.path.expanduser(path)
+        parser = SafeConfigParser(allow_no_value=True)
 
-        parser = ConfigParser.SafeConfigParser(allow_no_value=True)
-        parser.read(full_path)
-        parser.set(None, 'email', email)
-        parser.set(None, 'password', password)
-        parser.set(None, 'url', url)
-        parser.set(None, 'partner_id', partner_id)
+        for name, value in values.items():
+            parser.set(None, name, value)
 
-        with open(full_path, 'wb') as f:
+        with open(ConfigCommand._path, 'wb') as f:
             parser.write(f)
+
+    @staticmethod
+    def load():
+        """
+        Loads and returns all of the configuration settings
+        """
+        parser = SafeConfigParser(allow_no_value=True)
+        parser.read(ConfigCommand._path)
+        values = dict(parser.items('DEFAULT'))
+
+        if not values:
+            exit('No configuration settings could be read')
+
+        return values
 
 # Handles script execution
 if __name__ == '__main__':
