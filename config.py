@@ -60,8 +60,7 @@ class ConfigCommand:
             print 'Automatically using the only partner available:  {0}'.format(partner_id)
 
         elif partners.__len__ == 0:
-            print 'No partners were found. Please contact technical support for assistance.'
-            exit()
+            exit('No partners were found. Please contact technical support for assistance.')
 
         else:
             print 'Multiple partners were found. Please select one from the following:'
@@ -85,8 +84,7 @@ class ConfigCommand:
         response = requests.get('{0}/users/current/partners'.format(url), auth=(email, password))
 
         if response.status_code != 200:
-            print 'Invalid credentials'
-            exit()
+            exit('Failure validating credentials')
 
         partner = namedtuple('Partner', 'PartnerId Name')
         return [partner(p['PartnerId'], p['Name']) for p in response.json()]
