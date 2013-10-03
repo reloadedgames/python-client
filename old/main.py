@@ -1,4 +1,4 @@
-from test import crc
+from old.test import crc
 
 
 path = 'C:\Users\lmcnearney\Downloads\Package\\'
