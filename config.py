@@ -1,66 +1,114 @@
+"""
+Collects and stores the configuration information needed to use other commands.
+
+Usage:
+    config.py [options]
+    config.py -h | --help
+
+Options:
+    --email <email>             The user e-mail address
+    --password <password>       The user password
+    --partnerid <partnerid>     The partner ID
+    --url <url>                 The REST API URL
+
+If passed all options, the configuration will be validated and saved.
+Otherwise, you will be prompted for the missing configuration information.
+
+Configurations are stored in your home folder under the file: ~/.package.config
+"""
+
+from docopt import docopt
 import ConfigParser
+import getpass
 import os
+import requests
 
 
-class Config:
-    """
-    Handles passing around configuration settings and loads/saves them to disk
-    """
+class ConfigCommand:
+
     def __init__(self):
-        # Globally required
-        self.email = None
-        self.password = None
-        self.url = None
-        self.partner_id = None
+        pass
 
-        # Checkum
-        self.package_path = None
-
-        # Package and versions
-        self.package_id = None
-        self.version_id = None
-
-        self._path = os.path.expanduser('~/.package')
-        self._config = ConfigParser.ConfigParser(allow_no_value=True)
-
-        try:
-            self.load()
-        except ConfigParser.NoSectionError as e:
-            self.save()
-
-    def load(self):
+    def run(self, options):
         """
-        Loads the configuration from disk
+        Executes the command
         """
-        self._config.read(self._path)
+        email = options['--email']
+        password = options['--password']
+        url = options['--url']
 
-        self.email = self._config.get('general', 'email')
-        self.password = self._config.get('general', 'password')
-        self.url = self._config.get('general', 'url')
-        self.partner_id = self._config.get('general', 'partner_id')
+        if email is None:
+            email = raw_input('E-mail: ')
 
-        self.package_path = self._config.get('package', 'package_path')
-        self.package_id = self._config.get('package', 'package_id')
-        self.version_id = self._config.get('package', 'version_id')
+        if password is None:
+            password = getpass.getpass()
 
-    def save(self):
+        if url is None:
+            url = raw_input('URL: ')
+
+        print 'Validating credentials...'
+        partners = self.get_partners(email, password, url)
+        partner_id = options['--partnerid']
+        partner_ids = [partner['PartnerId'] for partner in partners]
+
+        if partner_id in partner_ids:
+            pass
+
+        elif partners.__len__ == 1:
+            partner_id = partners[0]['PartnerId']
+            print 'Automatically using the only partner available:  {0}'.format(partner_id)
+
+        elif partners.__len__ == 0:
+            print 'No partners were found. Please contact technical support for assistance.'
+            exit()
+
+        else:
+            print 'Multiple partners were found. Please select one from the following:'
+            print ''
+
+            for i in range(len(partners)):
+                print '{0}. {1}'.format(i, partners[i]['Name'])
+
+            print ''
+            i = int(raw_input('Please enter the number of the partner: '))
+            partner_id = partners[i]['PartnerId']
+
+        print 'Saving configuration...'
+        self.save(email, password, url, partner_id)
+
+    @staticmethod
+    def get_partners(email, password, url):
         """
-        Saves the configuration to disk
+        Validates the configuration by returning a list of partners
         """
-        if not self._config.has_section('general'):
-            self._config.add_section('general')
+        response = requests.get('{0}/users/current/partners'.format(url), auth=(email, password))
 
-        if not self._config.has_section('package'):
-            self._config.add_section('package')
+        if response.status_code != 200:
+            print 'Invalid credentials'
+            exit()
 
-        self._config.set('general', 'email', self.email)
-        self._config.set('general', 'password', self.password)
-        self._config.set('general', 'url', self.url)
-        self._config.set('general', 'partner_id', self.partner_id)
+        return response.json()
 
-        self._config.set('package', 'package_path', self.package_path)
-        self._config.set('package', 'package_id', self.package_id)
-        self._config.set('package', 'version_id', self.version_id)
+    @staticmethod
+    def save(email, password, url, partner_id):
+        """
+        Saves the configuration settings to the ~/package.config file
+        """
+        path = '~/package.config'
+        full_path = os.path.expanduser(path)
 
-        with open(self._path, 'wb') as f:
-            self._config.write(f)
+        parser = ConfigParser.SafeConfigParser(allow_no_value=True)
+        parser.read(full_path)
+        parser.set(None, 'email', email)
+        parser.set(None, 'password', password)
+        parser.set(None, 'url', url)
+        parser.set(None, 'partner_id', partner_id)
+
+        with open(full_path, 'wb') as f:
+            parser.write(f)
+
+# Handles script execution
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    command = ConfigCommand()
+    command.run(args)
