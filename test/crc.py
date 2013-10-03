@@ -2,7 +2,7 @@ import binascii
 import os
 
 
-def calculate_chunks(path, chunk_size):
+def calculate_chunks(path, chunk_size=1048576):
     if not os.path.isdir(path):
         exit('You must specify a directory')
 
@@ -26,17 +26,3 @@ def calculate_chunks(path, chunk_size):
                     chunk = f.read(chunk_size)
 
     return chunks
-
-if __name__ == '__main__':
-    _path = 'C:\Users\lmcnearney\Downloads\Package\\'
-    _chunk_size = 1048576
-
-    result = calculate_chunks(_path, _chunk_size)
-
-    for key in result:
-        print '{0} - {1} bytes'.format(key, result[key]['size'])
-
-        for crc in result[key]['pieces']:
-            print '=> {0} = {0:x}'.format(crc)
-
-        print ''

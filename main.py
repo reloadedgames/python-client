@@ -1,12 +1,14 @@
-from config import Config
-from pprint import pprint
+from test import crc
 
 
-if __name__ == '__main__':
-    config = Config()
-    config.email = 'lance@mcnearney.net'
-    config.password = 'testpass1'
-    config.url = 'https://manifests.reloadedtech.com'
-    config.save()
+path = 'C:\Users\lmcnearney\Downloads\Package\\'
 
-    pprint(vars(config))
+result = crc.calculate_chunks(path)
+
+for key in result:
+    print '{0} - {1} bytes'.format(key, result[key]['size'])
+
+    for crc in result[key]['pieces']:
+        print '=> {0} = {0:x}'.format(crc)
+
+    print ''
