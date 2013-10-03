@@ -17,6 +17,7 @@ Otherwise, you will be prompted for the missing configuration information.
 Configurations are stored in your home folder under the file: ~/.package.config
 """
 
+from collections import namedtuple
 from docopt import docopt
 import ConfigParser
 import getpass
@@ -49,13 +50,13 @@ class ConfigCommand:
         print 'Validating credentials...'
         partners = self.get_partners(email, password, url)
         partner_id = options['--partnerid']
-        partner_ids = [partner['PartnerId'] for partner in partners]
+        partner_ids = [p.PartnerId for p in partners]
 
         if partner_id in partner_ids:
             pass
 
         elif partners.__len__ == 1:
-            partner_id = partners[0]['PartnerId']
+            partner_id = partners[0].PartnerId
             print 'Automatically using the only partner available:  {0}'.format(partner_id)
 
         elif partners.__len__ == 0:
@@ -67,11 +68,11 @@ class ConfigCommand:
             print ''
 
             for i in range(len(partners)):
-                print '{0}. {1}'.format(i, partners[i]['Name'])
+                print '{0}. {1}'.format(i, partners[i].Name)
 
             print ''
             i = int(raw_input('Please enter the number of the partner: '))
-            partner_id = partners[i]['PartnerId']
+            partner_id = partners[i].PartnerId
 
         print 'Saving configuration...'
         self.save(email, password, url, partner_id)
@@ -87,7 +88,8 @@ class ConfigCommand:
             print 'Invalid credentials'
             exit()
 
-        return response.json()
+        partner = namedtuple('Partner', 'PartnerId Name')
+        return [partner(p['PartnerId'], p['Name']) for p in response.json()]
 
     @staticmethod
     def save(email, password, url, partner_id):
