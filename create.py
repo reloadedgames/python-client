@@ -49,6 +49,31 @@ class CreateCommand:
         package_type = options['--type']
         package = self.create_package(name, package_type)
 
+        # Create the version
+        print 'Creating an initial version...'
+        arguments = options['--arguments']
+        package_id = package['PackageId']
+        path_absolute = os.path.abspath(path)
+        run_path = os.path.abspath(options['--run'])
+        run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
+        version_name = options['--version-name']
+        version = self.create_version(package_id, run_relative_path, arguments, version_name)
+        version_id = version['VersionId']
+
+        # Add files
+        print 'Adding files to version...'
+
+        for f in package_files:
+            print '  {0}'.format(f.Path)
+            self.add_file(version_id, f, chunk_size)
+
+        # Complete the version
+        print 'Marking the version as complete...'
+        self.complete_version(version_id)
+
+        # Debug
+        print '/manifests/{0}/{1}'.format(package_id, version_id)
+
     def chunk_files(self, path, chunk_size):
         """
         Recursively reads all of the files in the specified path and returns a list of tuples
@@ -69,7 +94,7 @@ class CreateCommand:
         for root, dirs, files in os.walk(path):
             for f in files:
                 file_path = os.path.join(root, f)
-                file_path_relative = file_path.replace(path, '')
+                file_path_relative = file_path.replace(path, '').lstrip('/\\')
                 size = os.path.getsize(file_path)
                 checksums = self.calculate_checksums(file_path, chunk_size)
 
@@ -97,8 +122,73 @@ class CreateCommand:
         """
         Creates the package through the REST API and returns its information
         """
-        print self._settings
-        return ''
+        settings = self._settings
+        url = '{0}/packages'.format(settings['url'])
+        credentials = (settings['email'], settings['password'])
+        parameters = {
+            'Name': name,
+            'PartnerId': settings['partner_id'],
+            'Type': package_type
+        }
+
+        response = requests.post(url, parameters, auth=credentials)
+
+        if response.status_code != 200:
+            exit('There was a problem creating the package')
+
+        return response.json()
+
+    def create_version(self, package_id, run, arguments=None, name=None):
+        """
+        Creates the package version and returns its information
+        """
+        settings = self._settings
+        url = '{0}/packages/{1}/versions'.format(settings['url'], package_id)
+        credentials = (settings['email'], settings['password'])
+        parameters = {
+            'Arguments': arguments,
+            'Name': name,
+            'Run': run
+        }
+
+        version = requests.post(url, parameters, auth=credentials)
+
+        if version.status_code != 200:
+            exit('There was a problem creating the version')
+
+        return version.json()
+
+    def add_file(self, version_id, package_file, chunk_size):
+        """
+        Adds the file to the package version
+        """
+        settings = self._settings
+        url = '{0}/versions/{1}/files'.format(settings['url'], version_id)
+        credentials = (settings['email'], settings['password'])
+        parameters = {
+            'Checksums': ','.join(str(i) for i in package_file.Checksums),
+            'Chunk': chunk_size,
+            'Path': package_file.Path,
+            'Size': package_file.Size
+        }
+
+        response = requests.post(url, parameters, auth=credentials)
+
+        if response.status_code != 200:
+            exit('There was a problem adding the file to the version')
+
+    def complete_version(self, version_id):
+        """
+        Marks the version as complete after all of the files have been added
+        """
+        settings = self._settings
+        url = '{0}/versions/{1}/complete'.format(settings['url'], version_id)
+        credentials = (settings['email'], settings['password'])
+
+        response = requests.post(url, auth=credentials)
+
+        if response.status_code != 200:
+            exit('There was a problem marking the version as complete')
 
 # Handles script execution
 if __name__ == '__main__':
