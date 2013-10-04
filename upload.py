@@ -16,8 +16,11 @@ Options:
 
 from config import ConfigCommand
 from docopt import docopt
+import binascii
 import os
+import paramiko
 import requests
+import StringIO
 
 
 class UploadCommand:
@@ -31,17 +34,28 @@ class UploadCommand:
     def run(self, options):
         """
         Executes the command
+
+        @param options: The incoming command-line options
+        @type options: dict
         """
         print 'Querying upload settings...'
         settings = self.get_upload_settings()
         settings = self.merge_options(options, settings)
 
-        # Debug
-        print settings
+        print 'Connecting to server...'
+        sftp = self.sftp_client(settings)
+        contents = sftp.listdir_attr('.')
+
+        for item in contents:
+            print item
+
+        sftp.close()
 
     def get_upload_settings(self):
         """
         Pulls the upload settings from the REST API
+
+        @rtype : dict
         """
         settings = self._settings
         url = '{0}/settings/upload'.format(settings['url'])
@@ -64,6 +78,8 @@ class UploadCommand:
     def get_private_key(self):
         """
         Queries the private key from the REST API
+
+        @rtype string
         """
         settings = self._settings
         url = '{0}/partners/{1}/private-key'.format(settings['url'], settings['partner_id'])
@@ -80,6 +96,13 @@ class UploadCommand:
     def merge_options(options, settings):
         """
         Merges the command-line options and REST API settings into a single dictionary
+
+        @param options: The incoming command-line options
+        @type options: dict
+        @param settings: The settings from the API
+        @type settings: dict
+
+        @rtype : dict
         """
         host = options['--host']
         port = options['--port']
@@ -104,6 +127,40 @@ class UploadCommand:
             settings['fingerprint'] = fingerprint
 
         return settings
+
+    @staticmethod
+    def sftp_client(settings):
+        """
+        Connects to the SFTP server using the supplied settings and returns an SFTPClient
+
+        @param settings: The upload settings
+        @type settings: dict
+        @rtype : paramiko.SFTPClient
+        """
+        # Load the private key from a string
+        key_file = StringIO.StringIO(settings['private_key'])
+        key = paramiko.DSSKey.from_private_key(key_file)
+
+        # Open a connection
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            ssh.connect(hostname=settings['host'], port=settings['port'],
+                        username=settings['username'], pkey=key, look_for_keys=False)
+
+        except paramiko.AuthenticationException:
+            exit('Failure authenticating with server')
+
+        # Verify fingerprint
+        fingerprint = settings['fingerprint'].replace(':', '')
+        server_key = ssh.get_transport().get_remote_server_key()
+        server_fingerprint = binascii.hexlify(server_key.get_fingerprint())
+
+        if server_fingerprint != fingerprint:
+            exit('The fingerprint supplied by the host does not match')
+
+        return ssh.open_sftp()
 
 # Handles script execution
 if __name__ == '__main__':
