@@ -43,13 +43,14 @@ class UploadCommand:
         settings = self.merge_options(options, settings)
 
         print 'Connecting to server...'
-        sftp = self.sftp_client(settings)
+        ssh = self.ssh_client(settings)
+        sftp = ssh.open_sftp()
         contents = sftp.listdir_attr('.')
 
         for item in contents:
             print item
 
-        sftp.close()
+        ssh.close()
 
     def get_upload_settings(self):
         """
@@ -70,7 +71,7 @@ class UploadCommand:
         return {
             'host': json['Host'],
             'port': int(json['Port']),
-            'fingerprint': json['Fingerprints']['RSA'],
+            'fingerprint': json['Fingerprints']['DSA'],
             'username': settings['partner_id'],
             'private_key': self.get_private_key()
         }
@@ -129,13 +130,14 @@ class UploadCommand:
         return settings
 
     @staticmethod
-    def sftp_client(settings):
+    def ssh_client(settings):
         """
         Connects to the SFTP server using the supplied settings and returns an SFTPClient
 
         @param settings: The upload settings
         @type settings: dict
-        @rtype : paramiko.SFTPClient
+
+        @rtype : SSHClient
         """
         # Load the private key from a string
         key_file = StringIO.StringIO(settings['private_key'])
@@ -158,9 +160,12 @@ class UploadCommand:
         server_fingerprint = binascii.hexlify(server_key.get_fingerprint())
 
         if server_fingerprint != fingerprint:
-            exit('The fingerprint supplied by the host does not match')
+            print 'The fingerprint supplied by the host does not match:'
+            print '  Client: {0}'.format(fingerprint)
+            print '  Host: {0}'.format(server_fingerprint)
+            exit(1)
 
-        return ssh.open_sftp()
+        return ssh
 
 # Handles script execution
 if __name__ == '__main__':
