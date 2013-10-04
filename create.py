@@ -71,8 +71,16 @@ class CreateCommand:
         print 'Marking the version as complete...'
         self.complete_version(version_id)
 
-        # Debug
-        print '/manifests/{0}/{1}'.format(package_id, version_id)
+        print 'Saving package information to configuration...'
+        self._settings['package_id'] = package_id
+        self._settings['version_id'] = version_id
+        self._settings['path'] = path_absolute
+        ConfigCommand.save(self._settings)
+
+        print 'Package complete.'
+        print ''
+        print 'PackageId = {0}'.format(package_id)
+        print 'VersionId = {0}'.format(version_id)
 
     def chunk_files(self, path, chunk_size):
         """
