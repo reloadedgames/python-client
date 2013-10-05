@@ -27,6 +27,8 @@ import StringIO
 class UploadCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
+        self._upload_file = None
+        self._upload_percent = None
 
         # Validate settings
         if ('partner_id', 'version_id', 'path') <= self._settings.keys():
@@ -74,8 +76,10 @@ class UploadCommand:
             for f in files:
                 file_path = os.path.join(root, f)
                 server_path = file_path.replace(path, '').replace('\\', '/').lstrip('/\\')
-                print '  {0}'.format(server_path)
-                sftp.put(file_path, server_path)
+                self._upload_file = server_path
+                self._upload_percent = 0
+
+                sftp.put(file_path, server_path, callback=self.upload_progress)
 
         sftp.close()
         ssh.close()
@@ -216,6 +220,23 @@ class UploadCommand:
             raise
 
         return True
+
+    def upload_progress(self, size, file_size):
+        """
+        Updates the progress of the file transfer
+
+        @param size: The bytes transferred
+        @type size: int
+        @param file_size: The total file size
+        @type file_size: int
+        """
+        if self._upload_percent == 100:
+            print ''
+            return
+
+        # Keep refreshing the same line until complete
+        self._upload_percent = float(size) / file_size * 100
+        print '\r  {0} - {1:.0f}%'.format(self._upload_file, self._upload_percent),
 
 # Handles script execution
 if __name__ == '__main__':
