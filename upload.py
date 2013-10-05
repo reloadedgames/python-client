@@ -13,6 +13,7 @@ Options:
     --key <path>                    The private key path
     --fingerprint <fingerprint>     The fingerprint of the host
 """
+import errno
 
 from config import ConfigCommand
 from docopt import docopt
@@ -45,11 +46,38 @@ class UploadCommand:
         print 'Connecting to server...'
         ssh = self.ssh_client(settings)
         sftp = ssh.open_sftp()
-        contents = sftp.listdir_attr('.')
 
-        for item in contents:
-            print item
+        print 'Uploading files...'
+        package_id = self._settings['package_id']
+        version_id = self._settings['version_id']
+        path = self._settings['path']
 
+        # Create package/version folders
+        if not self.path_exists(sftp, package_id):
+            sftp.mkdir(package_id)
+
+        sftp.chdir(package_id)
+
+        if not self.path_exists(sftp, version_id):
+            sftp.mkdir(version_id)
+
+        sftp.chdir(version_id)
+
+        # Recursively upload files
+        for root, dirs, files in os.walk(path):
+            for d in dirs:
+                server_path = os.path.join(root, d).replace(path, '').replace('\\', '/').lstrip('/\\')
+
+                if not self.path_exists(sftp, server_path):
+                    sftp.mkdir(server_path)
+
+            for f in files:
+                file_path = os.path.join(root, f)
+                server_path = file_path.replace(path, '').replace('\\', '/').lstrip('/\\')
+                print '  {0}'.format(server_path)
+                sftp.put(file_path, server_path)
+
+        sftp.close()
         ssh.close()
 
     def get_upload_settings(self):
@@ -80,7 +108,7 @@ class UploadCommand:
         """
         Queries the private key from the REST API
 
-        @rtype string
+        @rtype : str
         """
         settings = self._settings
         url = '{0}/partners/{1}/private-key'.format(settings['url'], settings['partner_id'])
@@ -166,6 +194,28 @@ class UploadCommand:
             exit(1)
 
         return ssh
+
+    @staticmethod
+    def path_exists(sftp, path):
+        """
+        Returns whether the specified path exists on the remote server
+
+        @param sftp: The SFTPClient object
+        @type sftp: SFTPClient
+        @param path: The remote server path
+        @type path: str
+
+        @rtype : bool
+        """
+        try:
+            sftp.stat(path)
+        except IOError as e:
+            if e.errno == errno.ENOENT:
+                return False
+
+            raise
+
+        return True
 
 # Handles script execution
 if __name__ == '__main__':
