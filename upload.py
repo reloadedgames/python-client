@@ -181,7 +181,8 @@ class UploadCommand:
 
         try:
             ssh.connect(hostname=settings['host'], port=settings['port'],
-                        username=settings['username'], pkey=key, look_for_keys=False)
+                        username=settings['username'], pkey=key, look_for_keys=False,
+                        compress=True)
 
         except paramiko.AuthenticationException:
             exit('Failure authenticating with server')
