@@ -80,6 +80,10 @@ class UploadCommand:
                 self._upload_file = server_path
                 self._upload_percent = 0
 
+                # Ignore completed files
+                if self.path_exists(sftp, server_path) and sftp.stat(server_path).st_size == os.path.getsize(file_path):
+                    continue
+
                 sftp.put(file_path, server_path, callback=self.upload_progress)
 
         sftp.close()
