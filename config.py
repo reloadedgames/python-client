@@ -61,7 +61,7 @@ class ConfigCommand:
 
         elif partners.__len__ == 1:
             partner_id = partners[0].PartnerId
-            print 'Automatically using the only partner available:  {0}'.format(partner_id)
+            print 'Automatically using the only partner available: {0}'.format(partner_id)
 
         elif partners.__len__ == 0:
             exit('No partners were found. Please contact technical support for assistance.')

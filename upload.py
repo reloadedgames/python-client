@@ -13,11 +13,11 @@ Options:
     --key <path>                    The private key path
     --fingerprint <fingerprint>     The fingerprint of the host
 """
-import errno
 
 from config import ConfigCommand
 from docopt import docopt
 import binascii
+import errno
 import os
 import paramiko
 import requests
