@@ -20,18 +20,26 @@ Options:
 from collections import namedtuple
 from config import ConfigCommand
 from docopt import docopt
+from rest import RestApi
 import binascii
 import os
-import requests
 
 
 class CreateCommand:
     def __init__(self):
+        """
+        Initializes the command
+        """
+
         self._settings = ConfigCommand.load()
+        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
 
     def run(self, options):
         """
         Executes the command
+
+        @param options: The command-line options
+        @type options: dict
         """
 
         # Read the package files and calculate their checksums
@@ -47,7 +55,7 @@ class CreateCommand:
         print 'Creating the package...'
         name = options['--name']
         package_type = options['--type']
-        package = self.create_package(name, package_type)
+        package = self.rest.create_package(self._settings['partner_id'], name, package_type)
 
         # Create the version
         print 'Creating an initial version...'
@@ -57,7 +65,7 @@ class CreateCommand:
         run_path = os.path.abspath(options['--run'])
         run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
         version_name = options['--version-name']
-        version = self.create_version(package_id, run_relative_path, arguments, version_name)
+        version = self.rest.create_version(package_id, run_relative_path, arguments, version_name)
         version_id = version['VersionId']
 
         # Add files
@@ -65,11 +73,11 @@ class CreateCommand:
 
         for f in package_files:
             print '  {0}'.format(f.Path)
-            self.add_file(version_id, f, chunk_size)
+            self.rest.add_file(version_id, f.Path, f.Size, chunk_size, f.Checksums)
 
         # Complete the version
         print 'Marking the version as complete...'
-        self.complete_version(version_id)
+        self.rest.complete_version(version_id)
 
         print 'Saving package information to configuration...'
         self._settings['package_id'] = package_id
@@ -125,78 +133,6 @@ class CreateCommand:
                 chunk = f.read(chunk_size)
 
         return checksums
-
-    def create_package(self, name, package_type):
-        """
-        Creates the package through the REST API and returns its information
-        """
-        settings = self._settings
-        url = '{0}/packages'.format(settings['url'])
-        credentials = (settings['email'], settings['password'])
-        parameters = {
-            'Name': name,
-            'PartnerId': settings['partner_id'],
-            'Type': package_type
-        }
-
-        response = requests.post(url, parameters, auth=credentials)
-
-        if response.status_code != 200:
-            exit('There was a problem creating the package')
-
-        return response.json()
-
-    def create_version(self, package_id, run, arguments=None, name=None):
-        """
-        Creates the package version and returns its information
-        """
-        settings = self._settings
-        url = '{0}/packages/{1}/versions'.format(settings['url'], package_id)
-        credentials = (settings['email'], settings['password'])
-        parameters = {
-            'Arguments': arguments,
-            'Name': name,
-            'Run': run
-        }
-
-        version = requests.post(url, parameters, auth=credentials)
-
-        if version.status_code != 200:
-            exit('There was a problem creating the version')
-
-        return version.json()
-
-    def add_file(self, version_id, package_file, chunk_size):
-        """
-        Adds the file to the package version
-        """
-        settings = self._settings
-        url = '{0}/versions/{1}/files'.format(settings['url'], version_id)
-        credentials = (settings['email'], settings['password'])
-        parameters = {
-            'Checksums': ','.join(str(i) for i in package_file.Checksums),
-            'Chunk': chunk_size,
-            'Path': package_file.Path,
-            'Size': package_file.Size
-        }
-
-        response = requests.post(url, parameters, auth=credentials)
-
-        if response.status_code != 200:
-            exit('There was a problem adding the file to the version')
-
-    def complete_version(self, version_id):
-        """
-        Marks the version as complete after all of the files have been added
-        """
-        settings = self._settings
-        url = '{0}/versions/{1}/complete'.format(settings['url'], version_id)
-        credentials = (settings['email'], settings['password'])
-
-        response = requests.post(url, auth=credentials)
-
-        if response.status_code != 200:
-            exit('There was a problem marking the version as complete')
 
 # Handles script execution
 if __name__ == '__main__':

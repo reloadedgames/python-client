@@ -16,17 +16,18 @@ Options:
 
 from config import ConfigCommand
 from docopt import docopt
+from rest import RestApi
 import binascii
 import errno
 import os
 import paramiko
-import requests
 import StringIO
 
 
 class UploadCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
+        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
         self._upload_file = None
         self._upload_percent = None
 
@@ -42,7 +43,7 @@ class UploadCommand:
         @type options: dict
         """
         print 'Querying upload settings...'
-        settings = self.get_upload_settings()
+        settings = self.rest.get_upload_settings(self._settings['partner_id'])
         settings = self.merge_options(options, settings)
 
         print 'Connecting to server...'
@@ -84,47 +85,6 @@ class UploadCommand:
         sftp.close()
         ssh.close()
 
-    def get_upload_settings(self):
-        """
-        Pulls the upload settings from the REST API
-
-        @rtype : dict
-        """
-        settings = self._settings
-        url = '{0}/settings/upload'.format(settings['url'])
-
-        response = requests.get(url)
-
-        if response.status_code != 200:
-            exit('There was a problem querying the upload settings')
-
-        json = response.json()
-
-        return {
-            'host': json['Host'],
-            'port': int(json['Port']),
-            'fingerprint': json['Fingerprints']['DSA'],
-            'username': settings['partner_id'],
-            'private_key': self.get_private_key()
-        }
-
-    def get_private_key(self):
-        """
-        Queries the private key from the REST API
-
-        @rtype : str
-        """
-        settings = self._settings
-        url = '{0}/partners/{1}/private-key'.format(settings['url'], settings['partner_id'])
-        credentials = (settings['email'], settings['password'])
-
-        response = requests.get(url, auth=credentials)
-
-        if response.status_code != 200:
-            exit('There was a problem querying the private key')
-
-        return response.content
-
     @staticmethod
     def merge_options(options, settings):
         """
@@ -134,7 +94,6 @@ class UploadCommand:
         @type options: dict
         @param settings: The settings from the API
         @type settings: dict
-
         @rtype : dict
         """
         host = options['--host']
@@ -168,7 +127,6 @@ class UploadCommand:
 
         @param settings: The upload settings
         @type settings: dict
-
         @rtype : SSHClient
         """
         # Load the private key from a string
@@ -209,7 +167,6 @@ class UploadCommand:
         @type sftp: SFTPClient
         @param path: The remote server path
         @type path: str
-
         @rtype : bool
         """
         try:

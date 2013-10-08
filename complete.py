@@ -11,12 +11,13 @@ Options:
 
 from config import ConfigCommand
 from docopt import docopt
-import requests
+from rest import RestApi
 
 
 class CompleteCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
+        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
 
         # Validate settings
         if ('package_id', 'version_id') <= self._settings.keys():
@@ -35,27 +36,7 @@ class CompleteCommand:
             version_id = options['--versionid']
 
         print 'Updating the current package version to {0}...'.format(version_id)
-        self.set_version(version_id)
-
-    def set_version(self, version_id):
-        """
-        Sends the API request updating the package version
-
-        @param version_id: The primary key of the version
-        @type version_id: string
-        """
-        settings = self._settings
-        url = '{0}/packages/{1}'.format(settings['url'], settings['package_id'])
-        credentials = (settings['email'], settings['password'])
-        parameters = {
-            'VersionId': version_id
-        }
-
-        response = requests.put(url, auth=credentials)
-
-        if response.status_code != 200:
-            exit('There was a problem updating the current version')
-
+        self.rest.set_version(self._settings['package_id'], version_id)
 
 # Handles script execution
 if __name__ == '__main__':
