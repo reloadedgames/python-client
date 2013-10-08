@@ -17,7 +17,6 @@ Options:
     --version-name <name>   The name of the package version
 """
 
-from collections import namedtuple
 from config import ConfigCommand
 from docopt import docopt
 from rest import RestApi
@@ -72,8 +71,8 @@ class CreateCommand:
         print 'Adding files to version...'
 
         for f in package_files:
-            print '  {0}'.format(f.Path)
-            self.rest.add_file(version_id, f.Path, f.Size, chunk_size, f.Checksums)
+            print '  {0}'.format(f['path'])
+            self.rest.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'])
 
         # Complete the version
         print 'Marking the version as complete...'
@@ -94,6 +93,12 @@ class CreateCommand:
         """
         Recursively reads all of the files in the specified path and returns a list of tuples
         representing them with their appropriate CRC values based on the chunk_size
+
+        @param path: The directory file path
+        @type path: str
+        @param chunk_size: The chunk file size
+        @type chunk_size: int
+        @rtype : list
         """
         if not os.path.isdir(path):
             exit('The path specified is not a directory')
@@ -105,7 +110,6 @@ class CreateCommand:
             exit("The chunk size must be between 1KB and 1GB")
 
         package_files = []
-        package_file = namedtuple('PackageFile', 'Path Size Checksums')
 
         for root, dirs, files in os.walk(path):
             for f in files:
@@ -114,7 +118,11 @@ class CreateCommand:
                 size = os.path.getsize(file_path)
                 checksums = self.calculate_checksums(file_path, chunk_size)
 
-                package_files.append(package_file(file_path_relative, size, checksums))
+                package_files.append({
+                    'path': file_path_relative,
+                    'size': size,
+                    'checksums': checksums
+                })
 
         return package_files
 
@@ -122,6 +130,12 @@ class CreateCommand:
     def calculate_checksums(path, chunk_size):
         """
         Returns the CRC values for each chunk of the specified file
+
+        @param path: The path to the file
+        @type path: str
+        @param chunk_size: The file chunk size
+        @type chunk_size: int
+        @rtype : list
         """
         checksums = []
 
