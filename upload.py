@@ -207,8 +207,9 @@ class UploadCommand:
 
         with open(file_path, 'rb') as local_file:
             local_file.seek(offset)
+            server_file = sftp.open(server_path, mode)
 
-            with sftp.open(server_path, mode) as server_file:
+            try:
                 server_file.seek(offset)
                 data = local_file.read(byte_size)
 
@@ -218,6 +219,8 @@ class UploadCommand:
                     self.upload_progress(server_path, server_size, file_size)
 
                     data = local_file.read(byte_size)
+            finally:
+                server_file.close()
 
     @staticmethod
     def upload_progress(path, size, file_size):
