@@ -28,8 +28,6 @@ class UploadCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
         self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
-        self._upload_file = None
-        self._upload_percent = None
 
         # Validate settings
         if ('partner_id', 'version_id', 'path') <= self._settings.keys():
@@ -74,17 +72,38 @@ class UploadCommand:
                 if not self.path_exists(sftp, server_path):
                     sftp.mkdir(server_path)
 
+            # Manually upload to support resume and skip functionality
             for f in files:
                 file_path = os.path.join(root, f)
+                file_size = os.path.getsize(file_path)
                 server_path = file_path.replace(path, '').replace('\\', '/').lstrip('/\\')
-                self._upload_file = server_path
-                self._upload_percent = 0
+                server_size = 0
 
-                # Ignore completed files
-                if self.path_exists(sftp, server_path) and sftp.stat(server_path).st_size == os.path.getsize(file_path):
+                if self.path_exists(sftp, server_path):
+                    server_size = sftp.stat(server_path).st_size
+
+                # Skip completed files
+                if file_size == server_size:
                     continue
 
-                sftp.put(file_path, server_path, callback=self.upload_progress)
+                # Clean upload or resume mode?
+                mode = 'w' if server_size == 0 else 'r+'
+                offset = 0 if server_size == 0 else server_size - 1
+
+                with open(file_path, 'rb') as local_file:
+                    local_file.seek(offset)
+
+                    with sftp.open(server_path, mode) as server_file:
+                        server_file.seek(offset)
+                        byte_size = 32768
+                        data = local_file.read(byte_size)
+
+                        while data:
+                            server_file.write(data)
+                            server_size += len(data)
+                            self.upload_progress(server_path, server_size, file_size)
+
+                            data = local_file.read(byte_size)
 
         sftp.close()
         ssh.close()
@@ -183,22 +202,25 @@ class UploadCommand:
 
         return True
 
-    def upload_progress(self, size, file_size):
+    @staticmethod
+    def upload_progress(path, size, file_size):
         """
         Updates the progress of the file transfer
 
+        @param path: The path of the file
+        @type path: str
         @param size: The bytes transferred
         @type size: int
         @param file_size: The total file size
         @type file_size: int
         """
-        if self._upload_percent == 100:
-            print ''
-            return
 
         # Keep refreshing the same line until complete
-        self._upload_percent = float(size) / file_size * 100
-        print '\r  {0} - {1:.0f}%'.format(self._upload_file, self._upload_percent),
+        percent = float(size) / file_size * 100
+        print '\r  {0} - {1:.0f}%'.format(path, percent),
+
+        if size >= file_size:
+            print ''
 
 # Handles script execution
 if __name__ == '__main__':
