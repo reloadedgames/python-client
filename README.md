@@ -63,7 +63,8 @@ Configurations are stored in your home folder under the file: ~/.package.config
 To create a new package, you must first configure the package environment:
 
 ```
-python config.py --email=user@example.com --password=password --url=https://manifests.sandbox.reloadedtech.com
+python config.py --email=user@example.com --password=password 
+  --url=https://manifests.sandbox.reloadedtech.com
 
 Validating credentials...
 Multiple partners were found. Please select one from the following:
