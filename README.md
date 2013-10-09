@@ -38,7 +38,7 @@ The command-line tool includes the following scripts:
 Each script has a different set of arguments. For help with a script, execute the script using the `-h` option:
 
 ```
-python config.py -h
+$ python config.py -h
 
 Collects and stores the configuration information needed to use other commands.
 
@@ -63,7 +63,7 @@ Configurations are stored in your home folder under the file: ~/.package.config
 To create a new package, you must first configure the package environment:
 
 ```
-python config.py --email=user@example.com --password=password 
+$ python config.py --email=user@example.com --password=password
   --url=https://manifests.sandbox.reloadedtech.com
 
 Validating credentials...
@@ -83,7 +83,7 @@ The package environment settings are stored in your home directory and are used 
 After configuring your environment, you create the package:
 
 ```
-python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe" 
+$ python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe"
   --name "Python Client Test Package" --arguments "/install /quiet" --version-name "Version 1.00"
 
 Creating new package...
@@ -105,7 +105,7 @@ The package and version information is automatically saved in your configuration
 Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
 
 ```
-python upload.py
+$ python upload.py
 
 Querying upload settings...
 Connecting to server...
@@ -117,7 +117,7 @@ Uploading files...
 Once the package files have been uploaded, you can then set the current version of the package:
 
 ```
-python complete.py
+$ python complete.py
 
 Updating the current package version to 5255da8e35edd10a8809c8df...
 ```
@@ -135,7 +135,7 @@ You follow the same previous steps:
 Updating a package takes almost the same arguments as creating a package:
 
 ```
-python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe" 
+$ python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe" 
   --arguments "/install /quiet" --version-name "Version 2.00"
 
 Processing package files...
