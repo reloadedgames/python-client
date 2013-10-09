@@ -16,7 +16,8 @@ All of the required packages can be installed through pip:
 
 ### Windows
 
-The paramiko package will fail to install on Windows because of its dependency on PyCrypto (a C library). You can download and install a pre-built version for your specific Python/Windows version using the link below:
+The paramiko package will fail to install on Windows because of its dependency on PyCrypto (a C library). 
+You can download and install a pre-built version for your specific Python/Windows version using the link below:
 
 - [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
@@ -81,7 +82,8 @@ The package environment settings are stored in your home directory and are used 
 After configuring your environment, you create the package:
 
 ```
-python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe" --name "Python Client Test Package" --arguments "/install /quiet" --version-name "Version 1.00"
+python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe" 
+  --name "Python Client Test Package" --arguments "/install /quiet" --version-name "Version 1.00"
 
 Creating new package...
 Processing package files...
