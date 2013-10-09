@@ -72,38 +72,10 @@ class UploadCommand:
                 if not self.path_exists(sftp, server_path):
                     sftp.mkdir(server_path)
 
-            # Manually upload to support resume and skip functionality
             for f in files:
                 file_path = os.path.join(root, f)
-                file_size = os.path.getsize(file_path)
                 server_path = file_path.replace(path, '').replace('\\', '/').lstrip('/\\')
-                server_size = 0
-
-                if self.path_exists(sftp, server_path):
-                    server_size = sftp.stat(server_path).st_size
-
-                # Skip completed files
-                if file_size == server_size:
-                    continue
-
-                # Clean upload or resume mode?
-                mode = 'w' if server_size == 0 else 'r+'
-                offset = 0 if server_size == 0 else server_size - 1
-
-                with open(file_path, 'rb') as local_file:
-                    local_file.seek(offset)
-
-                    with sftp.open(server_path, mode) as server_file:
-                        server_file.seek(offset)
-                        byte_size = 32768
-                        data = local_file.read(byte_size)
-
-                        while data:
-                            server_file.write(data)
-                            server_size += len(data)
-                            self.upload_progress(server_path, server_size, file_size)
-
-                            data = local_file.read(byte_size)
+                self.upload_file(sftp, file_path, server_path)
 
         sftp.close()
         ssh.close()
@@ -201,6 +173,51 @@ class UploadCommand:
             raise
 
         return True
+
+    def upload_file(self, sftp, file_path, server_path):
+        """
+        Manually performs the file upload with skip and resume support
+
+        @param sftp: The SFTPClient connection
+        @type sftp: SFTPClient
+        @param file_path: The local file path
+        @type file_path: str
+        @param server_path: The remote file path
+        @type server_path: str
+        """
+        file_size = os.path.getsize(file_path)
+        server_size = 0
+
+        if self.path_exists(sftp, server_path):
+            server_size = sftp.stat(server_path).st_size
+
+        # Skip completed files
+        if file_size == server_size:
+            return
+
+        # Clean upload
+        mode = 'w'
+        offset = 0
+        byte_size = 32768
+
+        # Resume
+        if server_size > 0:
+            mode = 'r+'
+            offset = server_size - 1
+
+        with open(file_path, 'rb') as local_file:
+            local_file.seek(offset)
+
+            with sftp.open(server_path, mode) as server_file:
+                server_file.seek(offset)
+                data = local_file.read(byte_size)
+
+                while data:
+                    server_file.write(data)
+                    server_size += len(data)
+                    self.upload_progress(server_path, server_size, file_size)
+
+                    data = local_file.read(byte_size)
 
     @staticmethod
     def upload_progress(path, size, file_size):
