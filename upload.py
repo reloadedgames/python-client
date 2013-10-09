@@ -232,6 +232,12 @@ class UploadCommand:
         @type file_size: int
         """
 
+        # Truncate the path to avoid spilling onto two lines
+        max_length = 65
+
+        if len(path) > max_length:
+            path = '...' + path[-max_length:]
+
         # Keep refreshing the same line until complete
         percent = float(size) / file_size * 100
         print '\r  {0} - {1:.0f}%'.format(path, percent),
