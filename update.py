@@ -27,7 +27,7 @@ import binascii
 import os
 
 
-class UpdateCommand:
+class UpdateCommand(object):
     def __init__(self):
         """
         Initializes the command
