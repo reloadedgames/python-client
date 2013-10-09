@@ -20,14 +20,40 @@ The paramiko package will fail to install on Windows because of its dependency o
 
 - [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
-## Command Overview
+## Scripts Overview
 
 The command-line tool includes the following scripts:
 
 |Script|Purpose|
 |:-----|:-------|
-|complete.py|Sets the current version of a package|
-|config.py|Configures the package environment|
-|create.py|Creates a new package and version|
-|update.py|Updates an existing package with a new version|
-|upload.py|Uploads package files to the SFTP infrastructure|
+|complete.py|Sets the newly created version as the current package version.|
+|config.py|Collects and stores the configuration information needed to use other commands.|
+|create.py|Creates a new package.|
+|update.py|Updates an existing package with a new version.|
+|upload.py|Uploads package contents to the SFTP infrastructure.|
+
+### Script Arguments and Help
+
+Each script has a different set of arguments. For help with a script, execute the script passing the `-h` option:
+
+```
+python config.py -h
+
+Collects and stores the configuration information needed to use other commands.
+
+Usage:
+    config.py [options]
+    config.py -h | --help
+
+Options:
+    --email <email>             The user e-mail address
+    --password <password>       The user password
+    --partnerid <partnerid>     The partner ID
+    --url <url>                 The REST API URL
+
+If passed all options, the configuration will be validated and saved.
+Otherwise, you will be prompted for the missing configuration information.
+
+Configurations are stored in your home folder under the file: ~/.package.config
+```
+
