@@ -120,3 +120,33 @@ python complete.py
 
 Updating the current package version to 5255da8e35edd10a8809c8df...
 ```
+
+## Updating a Package
+
+Updating an existing package with a new version is similar to creating a new package. 
+You follow the same previous steps:
+
+- Configure the environment (optional)
+- Update the package
+- Upload the files
+- Set the current package version
+
+Updating a package takes almost the same arguments as creating a package:
+
+```
+python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe" 
+  --arguments "/install /quiet" --version-name "Version 2.00"
+
+Processing package files...
+Creating new version...
+Adding files to version...
+  Installer.bin
+  Installer.exe
+Marking the version as complete...
+Saving package information to configuration...
+Package complete.
+
+PackageId = 5255da8e35edd10a8809c8de
+VersionId = 5255de8335edd10a8809c8e2
+```
+
