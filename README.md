@@ -34,7 +34,7 @@ The command-line tool includes the following scripts:
 
 ### Script Arguments and Help
 
-Each script has a different set of arguments. For help with a script, execute the script passing the `-h` option:
+Each script has a different set of arguments. For help with a script, execute the script using the `-h` option:
 
 ```
 python config.py -h
@@ -57,3 +57,64 @@ Otherwise, you will be prompted for the missing configuration information.
 Configurations are stored in your home folder under the file: ~/.package.config
 ```
 
+## Creating a Package
+
+To create a new package, you must first configure the package environment:
+
+```
+python config.py --email=user@example.com --password=password --url=https://manifests.sandbox.reloadedtech.com
+
+Validating credentials...
+Multiple partners were found. Please select one from the following:
+
+0. GamersFirst
+1. K2 Network
+2. Reloaded Games
+3. Reloaded Technologies
+
+Please enter the number of the partner: 0
+Saving configuration...
+```
+
+The package environment settings are stored in your home directory and are used when executing other commands.
+
+After configuring your environment, you create the package:
+
+```
+python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe" --name "Python Client Test Package" --arguments "/install /quiet" --version-name "Version 1.00"
+
+Creating new package...
+Processing package files...
+Creating new version...
+Adding files to version...
+  Installer.bin
+  Installer.exe
+Marking the version as complete...
+Saving package information to configuration...
+Package complete.
+
+PackageId = 5255da8e35edd10a8809c8de
+VersionId = 5255da8e35edd10a8809c8df
+```
+
+The package and version information is automatically saved in your configuration after executing the command.
+
+Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
+
+```
+python upload.py
+
+Querying upload settings...
+Connecting to server...
+Uploading files...
+  Installer.bin - 100%
+  Installer.exe - 100%
+```
+
+Once the package files have been uploaded, you can then set the current version of the package:
+
+```
+python complete.py
+
+Updating the current package version to 5255da8e35edd10a8809c8df...
+```
