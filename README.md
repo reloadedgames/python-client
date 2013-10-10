@@ -9,16 +9,24 @@ This project contains Python scripts for command-line package management.
 |:white_check_mark:|Ubuntu 13.04 x64|2.7.4||
 |:white_check_mark:|Windows 7 x64|2.6.6||
 |:white_check_mark:|Windows 7 x64|2.7.5|Development environment|
-|:red_circle:|Windows 7 x64|3.0.1|Broken due to setuptools, use Python 3.2|
-|:red_circle:|Windows 7 x64|3.1.4|Broken due to docopt, use Python 3.2|
+|:red_circle:|Windows 7 x64|3.0.1|Broken due to setuptools|
+|:red_circle:|Windows 7 x64|3.1.4|Broken due to docopt|
 
 ## Required Packages
 
 All of the required packages can be installed through pip:
 
-- [docopt v0.6.1](https://github.com/docopt/docopt) (pip install docopt==0.6.1)
+- [docopt v0.6.1](https://github.com/docopt/docopt)
 - [paramiko](https://github.com/paramiko/paramiko)
 - [requests](http://docs.python-requests.org/en/latest/)
+
+### Docopt
+
+Install the specific version of docopt using the following command:
+
+```
+$ pip install docopt==0.6.1
+```
 
 ### Windows
 
