@@ -10,7 +10,7 @@ Python 2.6 and 2.7 are supported.
 
 |Status|Operating System|Python Version|Notes|
 |:----:|:---------------|:-------------|:----|
-|:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8|[Notes](#yum-notes)|
+|:white_check_mark:|Amazon Linux AMI 2013.09 x32|2.6.8|[Notes](#yum-notes)|
 |:white_check_mark:|Ubuntu Linux 13.04 x64|2.7.4||
 |:white_check_mark:|Ubuntu Linux 13.04 x64|2.6.8||
 |:white_check_mark:|Windows 7 x64|2.6.6|[Notes](#windows-notes)|
