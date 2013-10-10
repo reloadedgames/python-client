@@ -91,7 +91,7 @@ class ConfigCommand:
         """
         Saves the configuration settings to the ~/package.config file
         """
-        parser = SafeConfigParser(allow_no_value=True)
+        parser = SafeConfigParser()
 
         for name, value in values.items():
             parser.set(None, name, value)
@@ -104,7 +104,7 @@ class ConfigCommand:
         """
         Loads and returns all of the configuration settings
         """
-        parser = SafeConfigParser(allow_no_value=True)
+        parser = SafeConfigParser()
         parser.read(ConfigCommand._path)
         values = dict(parser.items('DEFAULT'))
 
