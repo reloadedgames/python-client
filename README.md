@@ -79,9 +79,11 @@ Configurations are stored in your home folder under the file: ~/.package.config
 To create a new package, you must first configure the package environment:
 
 ```
-$ python config.py --email=user@example.com --password=password
-  --url=https://manifests.sandbox.reloadedtech.com
+$ python config.py
 
+E-mail: user@example.com
+Password:
+URL: https://manifests.sandbox.reloadedtech.com
 Validating credentials...
 Multiple partners were found. Please select one from the following:
 
@@ -92,6 +94,7 @@ Multiple partners were found. Please select one from the following:
 
 Please enter the number of the partner: 0
 Saving configuration...
+
 ```
 
 The package environment settings are stored in your home directory and are used when executing other commands.
@@ -100,7 +103,7 @@ After configuring your environment, you create the package:
 
 ```
 $ python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe"
-  --name "Python Client Test Package" --arguments "/install /quiet" --version-name "Version 1.00"
+  --name "Python Client Test Package"
 
 Creating new package...
 Processing package files...
@@ -151,8 +154,7 @@ You follow the same previous steps:
 Updating a package takes almost the same arguments as creating a package:
 
 ```
-$ python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe" 
-  --arguments "/install /quiet" --version-name "Version 2.00"
+$ python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe"
 
 Processing package files...
 Creating new version...
