@@ -4,12 +4,12 @@ This project contains Python scripts for command-line package management.
 
 ## Compatibility Testing
 
-|Operating System|Python Version|Notes|
-|:---------------|:-------------|:----|
-|Ubuntu 13.04 x64|2.7.4||
-|Windows 7 x64|2.6.6||
-|Windows 7 x64|2.7.5|Development environment|
-|Windows 7 x64|3.0.1|Broken due to setuptools|
+|Status|Operating System|Python Version|Notes|
+|:----:|:---------------|:-------------|:----|
+|:white_check_mark:|Ubuntu 13.04 x64|2.7.4||
+|:white_check_mark:|Windows 7 x64|2.6.6||
+|:white_check_mark:|Windows 7 x64|2.7.5|Development environment|
+|:red_circle:|Windows 7 x64|3.0.1|Broken due to setuptools, use Python 3.1|
 
 ## Required Packages
 
