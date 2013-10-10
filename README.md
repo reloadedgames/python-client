@@ -35,7 +35,7 @@ You can download and install a pre-built version for your specific Python/Window
 
 ## Required Packages
 
-All of the required packages can be installed through pip:
+All of the required packages can be installed through pip (see previous notes for certain platform issues):
 
 - [docopt v0.6.1](https://github.com/docopt/docopt)
 - [paramiko](https://github.com/paramiko/paramiko)
