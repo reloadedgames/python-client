@@ -11,7 +11,6 @@ Options:
     --host <host>                   The host name
     --key <path>                    The private key path
     --port <port>                   The host port
-    --resume                        Enable resume support
     --username <username>           The username
 """
 
@@ -65,9 +64,6 @@ class UploadCommand:
 
         sftp.chdir(version_id)
 
-        # Recursively upload files
-        pipelined = not options['--resume']
-
         for root, dirs, files in os.walk(path):
             for d in dirs:
                 server_path = os.path.join(root, d).replace(path, '').replace('\\', '/').lstrip('/\\')
@@ -78,7 +74,7 @@ class UploadCommand:
             for f in files:
                 file_path = os.path.join(root, f)
                 server_path = file_path.replace(path, '').replace('\\', '/').lstrip('/\\')
-                self.upload_file(sftp, file_path, server_path, pipelined=pipelined)
+                self.upload_file(sftp, file_path, server_path)
 
         sftp.close()
         ssh.close()
@@ -177,7 +173,7 @@ class UploadCommand:
 
         return True
 
-    def upload_file(self, sftp, file_path, server_path, pipelined=True):
+    def upload_file(self, sftp, file_path, server_path):
         """
         Manually performs the file upload with skip and resume support
 
@@ -187,8 +183,6 @@ class UploadCommand:
         @type file_path: str
         @param server_path: The remote file path
         @type server_path: str
-        @param pipelined: Whether to enable pipelining for file transfers
-        @type pipelined: bool
         """
         file_size = os.path.getsize(file_path)
         server_size = 0
@@ -215,8 +209,7 @@ class UploadCommand:
             server_file = sftp.open(server_path, mode)
 
             try:
-                # Enabling pipelined transfers causes incomplete files to be deleted
-                server_file.set_pipelined(pipelined)
+                server_file.set_pipelined(True)
                 server_file.seek(offset)
                 data = local_file.read(byte_size)
 
