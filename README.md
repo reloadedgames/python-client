@@ -11,6 +11,7 @@ Python 2.6 and 2.7 are supported.
 |Status|Operating System|Python Version|Notes|
 |:----:|:---------------|:-------------|:----|
 |:white_check_mark:|Ubuntu 13.04 x64|2.7.4||
+|:white_check_mark:|Ubuntu 13.04 x64|2.6.8||
 |:white_check_mark:|Windows 7 x64|2.6.6||
 |:white_check_mark:|Windows 7 x64|2.7.5|Development environment|
 
