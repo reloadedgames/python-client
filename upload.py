@@ -133,11 +133,13 @@ class UploadCommand:
 
         try:
             ssh.connect(hostname=settings['host'], port=settings['port'],
-                        username=settings['username'], pkey=key, look_for_keys=False,
-                        compress=True)
+                        username=settings['username'], pkey=key, look_for_keys=False)
 
         except paramiko.AuthenticationException:
             exit('Failure authenticating with server')
+
+        # Older paramiko packages don't support setting this in connect(), so set it here instead
+        ssh.get_transport().use_compression(True)
 
         # Verify fingerprint
         fingerprint = settings['fingerprint'].replace(':', '')
