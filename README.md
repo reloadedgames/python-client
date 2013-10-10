@@ -9,6 +9,7 @@ This project contains Python scripts for command-line package management.
 |Ubuntu 13.04 x64|2.7.4||
 |Windows 7 x64|2.6.6||
 |Windows 7 x64|2.7.5|Development environment|
+|Windows 7 x64|3.0.1|Broken due to setuptools|
 
 ## Required Packages
 
