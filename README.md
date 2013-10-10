@@ -2,9 +2,12 @@
 
 This project contains Python scripts for command-line package management.
 
-## Python Version
+## Compatibility
 
-- 2.7 on Windows 7 x64 (development environment)
+|Operating System|Python Version|Notes|
+|:---------------|:-------------|:----|
+|Ubuntu 13.04 x64|2.7.4||
+|Windows 7 x64|2.7.5|Development environment|
 
 ## Required Packages
 
