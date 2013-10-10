@@ -2,6 +2,10 @@
 
 This project contains Python scripts for command-line package management.
 
+## Python Versions
+
+Python 2.6 and 2.7 are supported.
+
 ## Compatibility Testing
 
 |Status|Operating System|Python Version|Notes|
@@ -9,8 +13,6 @@ This project contains Python scripts for command-line package management.
 |:white_check_mark:|Ubuntu 13.04 x64|2.7.4||
 |:white_check_mark:|Windows 7 x64|2.6.6||
 |:white_check_mark:|Windows 7 x64|2.7.5|Development environment|
-|:red_circle:|Windows 7 x64|3.0.1|Broken due to setuptools|
-|:red_circle:|Windows 7 x64|3.1.4|Broken due to docopt|
 
 ## Required Packages
 
