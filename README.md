@@ -10,10 +10,28 @@ Python 2.6 and 2.7 are supported.
 
 |Status|Operating System|Python Version|Notes|
 |:----:|:---------------|:-------------|:----|
-|:white_check_mark:|Ubuntu 13.04 x64|2.7.4||
-|:white_check_mark:|Ubuntu 13.04 x64|2.6.8||
-|:white_check_mark:|Windows 7 x64|2.6.6||
-|:white_check_mark:|Windows 7 x64|2.7.5|Development environment|
+|:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8|[Notes](#yum-notes)|
+|:white_check_mark:|Ubuntu Linux 13.04 x64|2.7.4||
+|:white_check_mark:|Ubuntu Linux 13.04 x64|2.6.8||
+|:white_check_mark:|Windows 7 x64|2.6.6|[Notes](#windows-notes)|
+|:white_check_mark:|Windows 7 x64|2.7.5|[Notes](#windows-notes)|
+
+### Yum Notes
+
+Trying to install the paramiko package using `pip` will fail. Install it with `yum` instead:
+
+```
+yum install python-paramiko
+```
+
+Security and deprecation may appear when uploading files. These are caused by legacy package versions installed by Yum.
+
+### Windows Notes
+
+The paramiko package will fail to install on Windows because of its dependency on PyCrypto (a C library). 
+You can download and install a pre-built version for your specific Python/Windows version using the link below:
+
+- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
 ## Required Packages
 
@@ -30,13 +48,6 @@ Install the specific version of docopt using the following command:
 ```
 $ pip install docopt==0.6.1
 ```
-
-### Windows
-
-The paramiko package will fail to install on Windows because of its dependency on PyCrypto (a C library). 
-You can download and install a pre-built version for your specific Python/Windows version using the link below:
-
-- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
 ## Scripts Overview
 
