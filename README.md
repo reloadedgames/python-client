@@ -25,7 +25,8 @@ Trying to install the paramiko package using `pip` will fail. Install it with `y
 yum install python-paramiko
 ```
 
-Security and deprecation may appear when uploading files. These are caused by legacy package versions installed by Yum.
+Security and deprecation warnings may appear when uploading files. These are caused by legacy package 
+versions installed by Yum.
 
 ### Windows Notes
 
