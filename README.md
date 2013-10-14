@@ -13,6 +13,7 @@ Python 2.6 and 2.7 are supported.
 |:white_check_mark:|Amazon Linux AMI 2013.09|x32|2.6.8|[Notes](#linux-yum-package-notes)|
 |:white_check_mark:|CentOS 6 - 2013-05-27|x64|2.6.6|[Notes](#linux-yum-package-notes)|
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|x64|2.6.6||
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|x32|2.6.8|[Notes](#linux-suse-notes)|
 |:white_check_mark:|Ubuntu Linux 13.04|x64|2.7.4||
 |:white_check_mark:|Ubuntu Linux 13.04|x64|2.6.8||
 |:white_check_mark:|Windows 7|x64|2.6.6|[Notes](#windows-notes)|
@@ -27,6 +28,20 @@ install the following `yum` packages:
 yum install gcc 
 yum install python2-devel
 ```
+
+### Linux SUSE Notes
+
+As with other RPM-based distributions, the paramiko package requires GCC to be installed for compiling PyCrypto:
+
+```
+zypper in gcc
+```
+
+In addition, SUSE 11 SP3 does not include the intermediate [DigiCert High Assurance CA-3 certificate](https://www.digicert.com/digicert-root-certificates.htm) used by our
+HTTPS configuration. To work around this, you can do one of the following:
+
+- Install the certificate to /etc/ssl/certs (beyond the scope of this guide)
+- Use the --insecure option when running the `config.py` script to disable HTTPS verification
 
 ### Windows Notes
 
