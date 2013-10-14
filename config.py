@@ -7,6 +7,7 @@ Usage:
 
 Options:
     --email <email>             The user e-mail address
+    --insecure                  Disables HTTPS certificate validation
     --password <password>       The user password
     --partnerid <partnerid>     The partner ID
     --url <url>                 The REST API URL
@@ -40,6 +41,7 @@ class ConfigCommand:
         email = options['--email']
         password = options['--password']
         url = options['--url']
+        verify = not options['--insecure']
 
         if email is None:
             email = raw_input('E-mail: ')
@@ -50,8 +52,15 @@ class ConfigCommand:
         if url is None:
             url = raw_input('URL: ')
 
+        settings = {
+            'email': email,
+            'password': password,
+            'url': url,
+            'verify': str(verify)
+        }
+
         print 'Validating credentials...'
-        self.rest = RestApi(url, email, password)
+        self.rest = RestApi(settings)
 
         partners = self.rest.get_user_partners()
         partner_id = options['--partnerid']
@@ -78,13 +87,10 @@ class ConfigCommand:
             i = int(raw_input('Please enter the number of the partner: '))
             partner_id = partners[i]['PartnerId']
 
+        settings['partner_id'] = partner_id
+
         print 'Saving configuration...'
-        self.save({
-            'email': email,
-            'password': password,
-            'url': url,
-            'partner_id': partner_id
-        })
+        self.save(settings)
 
     @staticmethod
     def save(values):

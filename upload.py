@@ -28,7 +28,7 @@ import sys
 class UploadCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
-        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
+        self.rest = RestApi(self._settings)
 
         # Validate settings
         if ('partner_id', 'version_id', 'path') <= self._settings.keys():

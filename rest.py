@@ -2,20 +2,17 @@ import requests
 
 
 class RestApi:
-    def __init__(self, url, email, password):
+    def __init__(self, settings):
         """
         Initializes the RestApi class
 
-        @param url: The base URL of the REST API
-        @type url: str
-        @param email: The user's e-mail address
-        @type email: str
-        @param password: The user's password
-        @type password: str
+        @param settings: The API settings
+        @type settings: dict
         """
-        self.url = url
-        self.email = email
-        self.password = password
+        self.url = settings['url']
+        self.email = settings['email']
+        self.password = settings['password']
+        self.verify = bool(settings['verify'])
 
     def auth(self):
         """
@@ -31,7 +28,7 @@ class RestApi:
 
         @rtype : list
         """
-        response = requests.get('{0}/users/current/partners'.format(self.url), auth=self.auth())
+        response = requests.get('{0}/users/current/partners'.format(self.url), auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure querying user partners')
@@ -57,7 +54,7 @@ class RestApi:
             'Type': package_type
         }
 
-        response = requests.post(url, parameters, auth=self.auth())
+        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure creating package')
@@ -85,7 +82,7 @@ class RestApi:
             'Run': run
         }
 
-        response = requests.post(url, parameters, auth=self.auth())
+        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure creating version')
@@ -116,7 +113,7 @@ class RestApi:
             'Size': size
         }
 
-        response = requests.post(url, parameters, auth=self.auth())
+        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure adding file')
@@ -129,7 +126,7 @@ class RestApi:
         @type version_id: str
         """
         url = '{0}/versions/{1}/complete'.format(self.url, version_id)
-        response = requests.post(url, auth=self.auth())
+        response = requests.post(url, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure completing version')
@@ -142,7 +139,7 @@ class RestApi:
         @type partner_id: str
         @rtype : dict
         """
-        response = requests.get('{0}/settings/upload'.format(self.url))
+        response = requests.get('{0}/settings/upload'.format(self.url), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure querying upload settings')
@@ -166,7 +163,7 @@ class RestApi:
         @rtype : str
         """
         url = '{0}/partners/{1}/private-key'.format(self.url, partner_id)
-        response = requests.get(url, auth=self.auth())
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure querying private key')
@@ -187,7 +184,7 @@ class RestApi:
             'VersionId': version_id
         }
 
-        response = requests.put(url, parameters, auth=self.auth())
+        response = requests.put(url, parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure setting package version')

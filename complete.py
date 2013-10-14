@@ -17,7 +17,7 @@ from rest import RestApi
 class CompleteCommand:
     def __init__(self):
         self._settings = ConfigCommand.load()
-        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
+        self.rest = RestApi(self._settings)
 
         # Validate settings
         if ('package_id', 'version_id') <= self._settings.keys():

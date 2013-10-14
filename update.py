@@ -34,7 +34,7 @@ class UpdateCommand(object):
         """
 
         self._settings = ConfigCommand.load()
-        self.rest = RestApi(self._settings['url'], self._settings['email'], self._settings['password'])
+        self.rest = RestApi(self._settings)
 
     def run(self, options):
         """
