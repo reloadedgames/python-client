@@ -22,6 +22,7 @@ import errno
 import os
 import paramiko
 import StringIO
+import sys
 
 
 class UploadCommand:
@@ -246,6 +247,7 @@ class UploadCommand:
         # Keep refreshing the same line until complete
         percent = float(size) / file_size * 100
         print '\r  {0} - {1:.0f}%'.format(path, percent),
+        sys.stdout.flush()
 
         if size >= file_size:
             print ''
