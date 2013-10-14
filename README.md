@@ -20,7 +20,7 @@ Python 2.6 and 2.7 are supported.
 
 ### Linux Yum Package Notes
 
-Installing the paramiko package requires compiling the pycrypto library. For the compilation to work, you must
+Installing the paramiko package requires compiling the [PyCrypto](https://pypi.python.org/pypi/pycrypto) library. For the compilation to work, you must
 install the following `yum` packages:
 
 ```
