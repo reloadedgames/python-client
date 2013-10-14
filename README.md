@@ -19,7 +19,7 @@ Python 2.6 and 2.7 are supported.
 
 ### Linux AMI Notes
 
-Installing the paramiko package requires compiling the pycryto library. For the compilation to work, you must
+Installing the paramiko package requires compiling the pycrypto library. For the compilation to work, you must
 install the following `yum` packages:
 
 ```
