@@ -12,7 +12,7 @@ class RestApi:
         self.url = settings['url']
         self.email = settings['email']
         self.password = settings['password']
-        self.verify = bool(settings['verify'])
+        self.verify = settings['verify'] == 'True'
 
     def auth(self):
         """
