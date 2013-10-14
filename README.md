@@ -19,14 +19,13 @@ Python 2.6 and 2.7 are supported.
 
 ### Linux AMI Notes
 
-Trying to install the paramiko package using `pip` will fail. Install it with `yum` instead:
+Installing the paramiko package requires compiling the pycryto library. For the compilation to work, you must
+install the following `yum` packages:
 
 ```
-yum install python-paramiko
+yum install gcc 
+yum install python2-devel
 ```
-
-Security and deprecation warnings may appear when uploading files. These are caused by legacy package 
-versions installed by Yum.
 
 ### Windows Notes
 
