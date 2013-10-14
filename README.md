@@ -93,6 +93,7 @@ Usage:
 
 Options:
     --email <email>             The user e-mail address
+    --insecure                  Disables HTTPS certificate validation
     --password <password>       The user password
     --partnerid <partnerid>     The partner ID
     --url <url>                 The REST API URL
