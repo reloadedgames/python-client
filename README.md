@@ -30,14 +30,14 @@ yum install python2-devel
 
 ### Windows Notes
 
-The paramiko package will fail to install on Windows because of its dependency on PyCrypto (a C library). 
+The paramiko package will fail to install on Windows because of its dependency on [PyCrypto](https://pypi.python.org/pypi/pycrypto) (a C library). 
 You can download and install a pre-built version for your specific Python/Windows version using the link below:
 
 - [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
 ## Required Packages
 
-All of the required packages can be installed through pip (see previous notes for certain platform issues):
+All of the required packages can be installed through [pip](http://www.pip-installer.org/en/latest/) (see previous notes for certain platform issues):
 
 - [docopt v0.6.1](https://github.com/docopt/docopt)
 - [paramiko](https://github.com/paramiko/paramiko)
