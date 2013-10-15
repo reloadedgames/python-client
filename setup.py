@@ -7,6 +7,7 @@ setup(
     install_requires=[
         'docopt == 0.6.1',
         'paramiko >= 1.12.0',
+        'pycrypto >= 2.6',
         'requests >= 2.0'
     ],
     packages=find_packages(),
