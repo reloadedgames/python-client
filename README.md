@@ -29,7 +29,7 @@ Depending on your distribution, execute the appropriate command:
 
 |Distribution|Command|
 |:-----------|:-------|
-|Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-pip`|
+|Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-setuptools && easy_install pip`|
 |Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
 
 After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
