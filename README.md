@@ -1,14 +1,26 @@
-## Python Package Manager
+# Python Package Manager
 
 This project contains Python scripts for command-line package management.
 
-### Installation
+## Compatibility Testing
 
-#### Python Versions
+|Status|Operating System|Platform|Python Version(s)|Notes|
+|:----:|:---------------|:-------|:-------------|:----|
+|:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
+|:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
+|:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8||
+|:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
+|:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
+|:white_check_mark:|Windows 7|2.6.6, 2.7.5||
+
+## Installation
+
+### Python Versions
 
 Python 2.6 and 2.7 are supported.
 
-#### Linux
+### Linux
 
 Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
 C library. Other packages (such as git and pip) aren't required but are used to ease installation.
@@ -18,6 +30,7 @@ Depending on your distribution, execute the appropriate command:
 |Distribution|Command|
 |:-----------|:-------|
 |Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-pip`|
+|Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
 
 After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
 
@@ -50,7 +63,7 @@ Commands:
     upload      Uploads package contents to the SFTP infrastructure
 ```
 
-#### Windows
+### Windows
 
 Download and install the latest Python 2.7 for Windows release:
 
@@ -101,29 +114,6 @@ Commands:
     upload      Uploads package contents to the SFTP infrastructure
 ```
 
-## Compatibility Testing
-
-|Status|Operating System|Platform|Python Version|Notes|
-|:----:|:---------------|:-------|:-------------|:----|
-|:white_check_mark:|Amazon Linux AMI 2013.09|x32|2.6.8|[Notes](#linux-yum-package-notes)|
-|:white_check_mark:|CentOS 6 - 2013-05-27|x64|2.6.6|[Notes](#linux-yum-package-notes)|
-|:white_check_mark:|Red Hat Enterprise Linux 6.4|x64|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|x32|2.6.8|[Notes](#linux-suse-notes)|
-|:white_check_mark:|Ubuntu Linux 13.04|x64|2.7.4||
-|:white_check_mark:|Ubuntu Linux 13.04|x64|2.6.8||
-|:white_check_mark:|Windows 7|x64|2.6.6|[Notes](#windows-notes)|
-|:white_check_mark:|Windows 7|x64|2.7.5|[Notes](#windows-notes)|
-
-### Linux Yum Package Notes
-
-Installing the paramiko package requires compiling the [PyCrypto](https://pypi.python.org/pypi/pycrypto) library. For the compilation to work, you must
-install the following `yum` packages:
-
-```
-yum install gcc 
-yum install python2-devel
-```
-
 ### Linux SUSE Notes
 
 As with other RPM-based distributions, the paramiko package requires GCC to be installed for compiling PyCrypto:
@@ -138,25 +128,6 @@ HTTPS configuration. To work around this, you can do one of the following:
 - Install the certificate to /etc/ssl/certs (beyond the scope of this guide)
 - Use the --insecure option when running the `config.py` script to disable HTTPS verification
 
-### Windows Notes
-
-
-
-## Required Packages
-
-All of the required packages can be installed through [pip](http://www.pip-installer.org/en/latest/) (see previous notes for certain platform issues):
-
-- [docopt v0.6.1](https://github.com/docopt/docopt)
-- [paramiko](https://github.com/paramiko/paramiko)
-- [requests](http://docs.python-requests.org/en/latest/)
-
-### Docopt
-
-Install the specific version of docopt using the following command:
-
-```
-$ pip install docopt==0.6.1
-```
 
 ## Scripts Overview
 
