@@ -2,10 +2,10 @@
 Creates a new package.
 
 Usage:
-    create.py --path <path> --run <run> --name <name>
+    supernode create --path <path> --run <run> --name <name>
         [--arguments <args>] [--chunk-size 1048576]
         [--type package] [--version-name <name>]
-    create.py -h | --help
+    supernode create -h | --help
 
 Options:
     --arguments <args>      The arguments to pass to the file being run

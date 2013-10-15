@@ -2,8 +2,8 @@
 Sets the newly created version as the current package version.
 
 Usage:
-    complete.py [options]
-    complete.py -h | --help
+    supernode complete [options]
+    supernode complete -h | --help
 
 Options:
     --versionid <versionid>      The version to set as current

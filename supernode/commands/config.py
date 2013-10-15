@@ -2,8 +2,8 @@
 Collects and stores the configuration information needed to use other commands.
 
 Usage:
-    config.py [options]
-    config.py -h | --help
+    supernode config [options]
+    supernode config -h | --help
 
 Options:
     --email <email>             The user e-mail address

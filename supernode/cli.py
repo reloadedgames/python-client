@@ -2,9 +2,9 @@
 Provides commands for creating and managing super node packages.
 
 Usage:
-    cli.py <command> [<args>...]
-    cli.py <command> -h | --help
-    cli.py -h | --help
+    supernode <command> [<args>...]
+    supernode <command> -h | --help
+    supernode -h | --help
 
 Commands:
     complete    Sets the newly created version as the current package version
@@ -26,7 +26,7 @@ def main():
     args = docopt(__doc__, options_first=True)
     command_name = args['<command>'].lower()
     command = None
-    options = args['<args>']
+    options = [command_name] + args['<args>']
 
     if command_name == 'complete':
         command = CompleteCommand()

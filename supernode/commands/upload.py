@@ -3,8 +3,8 @@ Uploads the package contents. All arguments are optional as they will be
 queried from the REST API when the command is executed.
 
 Usage:
-    upload.py [options]
-    upload.py -h | --help
+    supernode upload [options]
+    supernode upload -h | --help
 
 Options:
     --fingerprint <fingerprint>     The fingerprint of the host

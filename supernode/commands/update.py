@@ -2,11 +2,11 @@
 Updates an existing package with a new version.
 
 Usage:
-    update.py --path <path> --run <run>
+    supernode update --path <path> --run <run>
         [--arguments <args>] [--chunk-size 1048576]
         [--packageid <packageid>] [--type package]
         [--version-name <name>]
-    update.py -h | --help
+    supernode update -h | --help
 
 Options:
     --arguments <args>          The arguments to pass to the file being run
