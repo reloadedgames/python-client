@@ -1,37 +1,37 @@
-# Python Package Manager
+## Python Package Manager
 
 This project contains Python scripts for command-line package management.
 
-## Installation
+### Installation
 
-### Python Versions
+#### Python Versions
 
-Python 2.6 and 2.7 are supported. 
+Python 2.6 and 2.7 are supported.
 
-### Linux
+#### Linux
 
-All major 
+Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
+C library. Other packages (such as git and pip) aren't required but are used to ease installation.
 
-GCC and the Python development files are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
-library. To install these packages, execute the following command depending on your Linux distribution:
+Depending on your distribution, execute the appropriate command:
 
-|Package Manager|Distributions|Command|
-|:--------------|:------------|:-------|
-|yum|Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-pip`|
+|Distribution|Command|
+|:-----------|:-------|
+|Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-pip`|
 
-After installing the required packages, clone this repository using git:
-
-```
-git clone https://github.com/reloadedgames/python-client.git
-```
-
-After cloning has finished, install the program using pip:
+After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
 
 ```
-pip install ./python-client
+$ git clone https://github.com/reloadedgames/python-client.git
 ```
 
-Once installed, you should have access to the program using the supernode command:
+After cloning has finished, install the program using [pip](http://www.pip-installer.org/):
+
+```
+$ pip install ./python-client
+```
+
+Once installed, the client will automatically be added to your bin path and can be ran using the `supernode` command:
 
 ```
 $ supernode -h
@@ -50,8 +50,56 @@ Commands:
     upload      Uploads package contents to the SFTP infrastructure
 ```
 
-### Windows
+#### Windows
 
+Download and install the latest Python 2.7 for Windows release:
+
+- [Download Python](http://www.python.org/getit/)
+
+Download and install the setuptools and pip modules:
+
+- [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
+- [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
+
+Add both the Python root installation folder (`C:\Python27\`) and its scripts folder (`C:\Python27\Scripts\`)
+to your environment path variable. This will allow you to access the python and pip commands easily.
+
+Download and install the pre-built version of the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
+library for your specific Python/Windows environment:
+
+- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
+
+Assuming you have [git](http://git-scm.com/) installed, clone the client repository:
+
+```
+C:\> git clone https://github.com/reloadedgames/python-client.git
+```
+
+Once cloned, install the client using [pip](http://www.pip-installer.org/):
+
+```
+C:\> pip install ./python-client
+```
+
+Once installed, the client will automatically be added to your Python scripts path and can be ran 
+using the `supernode` command:
+
+```
+C:\> supernode -h
+Provides commands for creating and managing super node packages.
+
+Usage:
+    supernode <command> [<args>...]
+    supernode <command> -h | --help
+    supernode -h | --help
+
+Commands:
+    complete    Sets the newly created version as the current package version
+    config      Collects configuration information needed to use other commands
+    create      Creates a new package
+    update      Updates an existing package with a new version
+    upload      Uploads package contents to the SFTP infrastructure
+```
 
 ## Compatibility Testing
 
@@ -92,10 +140,7 @@ HTTPS configuration. To work around this, you can do one of the following:
 
 ### Windows Notes
 
-The paramiko package will fail to install on Windows because of its dependency on [PyCrypto](https://pypi.python.org/pypi/pycrypto) (a C library). 
-You can download and install a pre-built version for your specific Python/Windows version using the link below:
 
-- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
 
 ## Required Packages
 
