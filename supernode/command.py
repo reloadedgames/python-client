@@ -6,6 +6,8 @@ class Command(object):
     def __init__(self):
         self.settings = {}
         self.api = None
+        self.load_settings()
+        self.load_api()
 
     def load_api(self):
         self.api = RestApi(self.settings)

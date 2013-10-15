@@ -14,9 +14,7 @@ Options:
     --username <username>           The username
 """
 
-from config import ConfigCommand
-from docopt import docopt
-from rest import RestApi
+from supernode.command import Command
 import binascii
 import errno
 import os
@@ -25,24 +23,17 @@ import StringIO
 import sys
 
 
-class UploadCommand:
-    def __init__(self):
-        self._settings = ConfigCommand.load()
-        self.rest = RestApi(self._settings)
-
-        # Validate settings
-        if ('partner_id', 'version_id', 'path') <= self._settings.keys():
-            exit('The current saved configuration does not support uploading')
+class UploadCommand(Command):
+    def help(self):
+        return __doc__
 
     def run(self, options):
-        """
-        Executes the command
+        # Validate settings
+        if ('partner_id', 'version_id', 'path') <= self.settings.keys():
+            exit('The current saved configuration does not support uploading')
 
-        @param options: The incoming command-line options
-        @type options: dict
-        """
         print 'Querying upload settings...'
-        settings = self.rest.get_upload_settings(self._settings['partner_id'])
+        settings = self.api.get_upload_settings(self.settings['partner_id'])
         settings = self.merge_options(options, settings)
 
         print 'Connecting to server...'
@@ -50,9 +41,9 @@ class UploadCommand:
         sftp = ssh.open_sftp()
 
         print 'Uploading files...'
-        package_id = self._settings['package_id']
-        version_id = self._settings['version_id']
-        path = self._settings['path']
+        package_id = self.settings['package_id']
+        version_id = self.settings['version_id']
+        path = self.settings['path']
 
         # Create package/version folders
         if not self.path_exists(sftp, package_id):
@@ -251,9 +242,3 @@ class UploadCommand:
 
         if size >= file_size:
             print ''
-
-# Handles script execution
-if __name__ == '__main__':
-    args = docopt(__doc__)
-    command = UploadCommand()
-    command.run(args)
