@@ -2,9 +2,56 @@
 
 This project contains Python scripts for command-line package management.
 
-## Python Versions
+## Installation
 
-Python 2.6 and 2.7 are supported.
+### Python Versions
+
+Python 2.6 and 2.7 are supported. 
+
+### Linux
+
+All major 
+
+GCC and the Python development files are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
+library. To install these packages, execute the following command depending on your Linux distribution:
+
+|Package Manager|Distributions|Command|
+|:--------------|:------------|:-------|
+|yum|Amazon AMI, CentOS, Red Hat|`yum install -y gcc git python2-devel python-pip`|
+
+After installing the required packages, clone this repository using git:
+
+```
+git clone https://github.com/reloadedgames/python-client.git
+```
+
+After cloning has finished, install the program using pip:
+
+```
+pip install ./python-client
+```
+
+Once installed, you should have access to the program using the supernode command:
+
+```
+$ supernode -h
+Provides commands for creating and managing super node packages.
+
+Usage:
+    supernode <command> [<args>...]
+    supernode <command> -h | --help
+    supernode -h | --help
+
+Commands:
+    complete    Sets the newly created version as the current package version
+    config      Collects configuration information needed to use other commands
+    create      Creates a new package
+    update      Updates an existing package with a new version
+    upload      Uploads package contents to the SFTP infrastructure
+```
+
+### Windows
+
 
 ## Compatibility Testing
 
