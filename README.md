@@ -25,11 +25,12 @@ Python 2.6 and 2.7 are supported.
 Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
 C library. Other packages (such as git and pip) aren't required but are used to ease installation.
 
-Depending on your distribution, execute the appropriate command:
+Depending on your distribution, execute the appropriate command(s):
 
 |Distribution|Command|
 |:-----------|:-------|
-|Amazon AMI, CentOS|`yum install -y gcc git python2-devel python-setuptools python-pip`|
+|Amazon AMI|`yum install -y gcc git python2-devel python-setuptools python-pip`|
+|CentOS|`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
 |Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
 |Red Hat|`yum erase -y python-paramiko python-crypto`<br>`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
 
