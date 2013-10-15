@@ -44,7 +44,7 @@ After cloning has finished, install the program using [pip](http://www.pip-insta
 $ pip install ./python-client
 ```
 
-Once installed, the client will automatically be added to your bin path and can be ran using the `supernode` command:
+Once installed, the client will automatically be added to your path and can be run using the `supernode` command:
 
 ```
 $ supernode -h
@@ -94,8 +94,7 @@ Once cloned, install the client using [pip](http://www.pip-installer.org/):
 C:\> pip install ./python-client
 ```
 
-Once installed, the client will automatically be added to your Python scripts path and can be ran 
-using the `supernode` command:
+Once installed, the client will automatically be added to your path and can be run using the `supernode` command:
 
 ```
 C:\> supernode -h
