@@ -2,8 +2,8 @@
 Collects and stores the configuration information needed to use other commands.
 
 Usage:
-    config.py [options]
-    config.py -h | --help
+    supernode config [options]
+    supernode config -h | --help
 
 Options:
     --email <email>             The user e-mail address
@@ -18,26 +18,20 @@ Otherwise, you will be prompted for the missing configuration information.
 Configurations are stored in your home folder under the file: ~/.package.config
 """
 
-from ConfigParser import SafeConfigParser
-from docopt import docopt
-
+from supernode.command import Command
 import getpass
-import os
-from rest import RestApi
 
 
-class ConfigCommand:
-
-    # The full path for the config file
-    _path = os.path.expanduser('~/package.config')
-
+class ConfigCommand(Command):
+    #noinspection PyMissingConstructor
     def __init__(self):
-        self.rest = None
+        self.api = None
+        self.settings = {}
+
+    def help(self):
+        return __doc__
 
     def run(self, options):
-        """
-        Executes the command
-        """
         email = options['--email']
         password = options['--password']
         url = options['--url']
@@ -52,17 +46,17 @@ class ConfigCommand:
         if url is None:
             url = raw_input('URL: ')
 
-        settings = {
+        self.settings = {
             'email': email,
             'password': password,
             'url': url,
             'verify': str(verify)
         }
 
-        print 'Validating credentials...'
-        self.rest = RestApi(settings)
+        self.load_api()
 
-        partners = self.rest.get_user_partners()
+        print 'Validating credentials...'
+        partners = self.api.get_user_partners()
         partner_id = options['--partnerid']
         partner_ids = [p['PartnerId'] for p in partners]
 
@@ -81,46 +75,13 @@ class ConfigCommand:
             print ''
 
             for i in range(len(partners)):
-                print '{0}. {1}'.format(i, partners[i]['Name'])
+                print '{0}. {1}'.format(i + 1, partners[i]['Name'])
 
             print ''
-            i = int(raw_input('Please enter the number of the partner: '))
+            i = int(raw_input('Please enter the number of the partner: ')) + 1
             partner_id = partners[i]['PartnerId']
 
-        settings['partner_id'] = partner_id
+        self.settings['partner_id'] = partner_id
 
         print 'Saving configuration...'
-        self.save(settings)
-
-    @staticmethod
-    def save(values):
-        """
-        Saves the configuration settings to the ~/package.config file
-        """
-        parser = SafeConfigParser()
-
-        for name, value in values.items():
-            parser.set(None, name, value)
-
-        with open(ConfigCommand._path, 'wb') as f:
-            parser.write(f)
-
-    @staticmethod
-    def load():
-        """
-        Loads and returns all of the configuration settings
-        """
-        parser = SafeConfigParser()
-        parser.read(ConfigCommand._path)
-        values = dict(parser.items('DEFAULT'))
-
-        if not values:
-            exit('No configuration settings could be read')
-
-        return values
-
-# Handles script execution
-if __name__ == '__main__':
-    args = docopt(__doc__)
-    command = ConfigCommand()
-    command.run(args)
+        self.save_settings()

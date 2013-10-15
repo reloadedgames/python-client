@@ -2,11 +2,11 @@
 Updates an existing package with a new version.
 
 Usage:
-    update.py --path <path> --run <run>
+    supernode update --path <path> --run <run>
         [--arguments <args>] [--chunk-size 1048576]
         [--packageid <packageid>] [--type package]
         [--version-name <name>]
-    update.py -h | --help
+    supernode update -h | --help
 
 Options:
     --arguments <args>          The arguments to pass to the file being run
@@ -20,32 +20,18 @@ If no package is specified, the command will update package_id stored in the
 current configuration.
 """
 
-from config import ConfigCommand
-from docopt import docopt
-from rest import RestApi
+from supernode.command import Command
 import binascii
 import os
 
 
-class UpdateCommand(object):
-    def __init__(self):
-        """
-        Initializes the command
-        """
-
-        self._settings = ConfigCommand.load()
-        self.rest = RestApi(self._settings)
+class UpdateCommand(Command):
+    def help(self):
+        return __doc__
 
     def run(self, options):
-        """
-        Executes the command
-
-        @param options: The command-line options
-        @type options: dict
-        """
-
         # Which package is being updated?
-        package_id = options['--packageid'] or self._settings['package_id']
+        package_id = options['--packageid'] or self.settings['package_id']
 
         if package_id is None:
             exit('No package specified')
@@ -66,7 +52,7 @@ class UpdateCommand(object):
         run_path = os.path.abspath(options['--run'])
         run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
         version_name = options['--version-name']
-        version = self.rest.create_version(package_id, run_relative_path, arguments, version_name)
+        version = self.api.create_version(package_id, run_relative_path, arguments, version_name)
         version_id = version['VersionId']
 
         # Add files
@@ -74,17 +60,17 @@ class UpdateCommand(object):
 
         for f in package_files:
             print '  {0}'.format(f['path'])
-            self.rest.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'])
+            self.api.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'])
 
         # Complete the version
         print 'Marking the version as complete...'
-        self.rest.complete_version(version_id)
+        self.api.complete_version(version_id)
 
         print 'Saving package information to configuration...'
-        self._settings['package_id'] = package_id
-        self._settings['version_id'] = version_id
-        self._settings['path'] = path_absolute
-        ConfigCommand.save(self._settings)
+        self.settings['package_id'] = package_id
+        self.settings['version_id'] = version_id
+        self.settings['path'] = path_absolute
+        self.save_settings()
 
         print 'Package complete.'
         print ''
@@ -149,9 +135,3 @@ class UpdateCommand(object):
                 chunk = f.read(chunk_size)
 
         return checksums
-
-# Handles script execution
-if __name__ == '__main__':
-    args = docopt(__doc__)
-    command = UpdateCommand()
-    command.run(args)
