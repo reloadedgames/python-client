@@ -9,7 +9,7 @@ This project contains Python scripts for command-line package management.
 |:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
 |:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8||
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Requires using the `config --insecure` argument to disable HTTPS certificate verification.|
 |:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
 |:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
 |:white_check_mark:|Windows 7|2.6.6, 2.7.5||
@@ -32,6 +32,7 @@ Depending on your distribution, execute the appropriate command(s):
 |Amazon AMI|`yum install -y gcc git python2-devel python-setuptools python-pip`|
 |CentOS|`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
 |Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
+|OpenSUSE|`zypper in -y gcc git python-devel python-setuptools`<br>`easy_install pip`|
 |Red Hat|`yum erase -y python-paramiko python-crypto`<br>`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
 
 After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
@@ -114,21 +115,6 @@ Commands:
     update      Updates an existing package with a new version
     upload      Uploads package contents to the SFTP infrastructure
 ```
-
-### Linux SUSE Notes
-
-As with other RPM-based distributions, the paramiko package requires GCC to be installed for compiling PyCrypto:
-
-```
-zypper in gcc
-```
-
-In addition, SUSE 11 SP3 does not include the intermediate [DigiCert High Assurance CA-3 certificate](https://www.digicert.com/digicert-root-certificates.htm) used by our
-HTTPS configuration. To work around this, you can do one of the following:
-
-- Install the certificate to /etc/ssl/certs (beyond the scope of this guide)
-- Use the --insecure option when running the `config.py` script to disable HTTPS verification
-
 
 ## Scripts Overview
 
