@@ -4,8 +4,8 @@ This project contains Python scripts for command-line package management.
 
 ## Compatibility Testing
 
-|Status|Operating System|Platform|Python Version(s)|Notes|
-|:----:|:---------------|:-------|:-------------|:----|
+|Status|Operating System|Python Version(s)|Notes|
+|:----:|:---------------|:----------------|:----|
 |:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
 |:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
