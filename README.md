@@ -24,7 +24,7 @@ Python versions 2.6 and 2.7 are supported.
 |:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
 |:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Use the `config --insecure` option<br>to disable HTTPS certificate verification.|
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Use the `config --insecure` option to disable HTTPS verification.|
 |:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
 |:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
 |:white_check_mark:|Windows 7|2.6.6, 2.7.5||
