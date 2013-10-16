@@ -1,6 +1,6 @@
 # Python Package Manager
 
-This project contains Python scripts for command-line package management.
+This project provides command-line tools for creating and managing super node packages.
 
 ## Python Versions
 
