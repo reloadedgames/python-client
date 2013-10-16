@@ -1,10 +1,21 @@
 # Python Package Manager
 
-This project provides command-line tools for creating and managing super node packages.
+This project provides command-line tools for creating and managing super node packages. 
 
-## Python Versions
+Python versions 2.6 and 2.7 are supported.
 
-Python 2.6 and 2.7 are supported.
+**Installation**
+
+* [Compatibility Testing](#compatibility-testing)
+* [Linux Installation](#linux-installation)
+* [Windows Installation](#windows-installation)
+
+**Usage**
+
+* [Commands Overview](#commands-overview)
+* [Creating a Package](#creating-a-package)
+* [Updating a Package](#updating-a-package)
+
 
 ## Compatibility Testing
 
