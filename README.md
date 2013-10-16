@@ -13,7 +13,7 @@ Python 2.6 and 2.7 are supported.
 |:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
 |:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Requires using the `config --insecure` argument<br>to disable HTTPS certificate verification.|
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Use the `config --insecure` option<br>to disable HTTPS certificate verification.|
 |:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
 |:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
 |:white_check_mark:|Windows 7|2.6.6, 2.7.5||
@@ -55,8 +55,8 @@ Download and install the latest Python 2.7 for Windows release:
 
 Download and install the setuptools and pip modules:
 
-- [setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
-- [pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
+- [Setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
+- [Pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
 
 Add both the Python root installation folder (`C:\Python27\`) and its scripts folder (`C:\Python27\Scripts\`)
 to your environment path variable. This will allow you to access the python and pip commands easily.
