@@ -212,7 +212,7 @@ You follow the same previous steps:
 Updating a package takes almost the same arguments as creating a package:
 
 ```bash
-$ supernode create --path /tmp/packages/example2 \
+$ supernode update --path /tmp/packages/example2 \
   --run /tmp/packages/example2/Installer.exe
 Processing package files...
 Creating new version...
