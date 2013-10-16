@@ -36,6 +36,7 @@ class UploadClient(SFTPClient):
         """
         # Load the private key from a string
         key_file = StringIO.StringIO(self.settings['private_key'])
+        #noinspection PyTypeChecker
         key = paramiko.DSSKey.from_private_key(key_file)
 
         # Open a connection
