@@ -2,6 +2,10 @@
 
 This project contains Python scripts for command-line package management.
 
+## Python Versions
+
+Python 2.6 and 2.7 are supported.
+
 ## Compatibility Testing
 
 |Status|Operating System|Python Version(s)|Notes|
@@ -9,18 +13,12 @@ This project contains Python scripts for command-line package management.
 |:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
 |:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
 |:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Requires using the `config --insecure` argument to disable HTTPS certificate verification.|
+|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Requires using the `config --insecure` argument<br>to disable HTTPS certificate verification.|
 |:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
 |:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
 |:white_check_mark:|Windows 7|2.6.6, 2.7.5||
 
-## Installation
-
-### Python Versions
-
-Python 2.6 and 2.7 are supported.
-
-### Linux
+## Linux Installation
 
 Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
 C library. Other packages (such as git and pip) aren't required but are used to ease installation.
@@ -47,26 +45,9 @@ After cloning has finished, install the program using [pip](http://www.pip-insta
 $ pip install ./python-client
 ```
 
-Once installed, the client will automatically be added to your path and can be run using the `supernode` command:
+Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
 
-```
-$ supernode -h
-Provides commands for creating and managing super node packages.
-
-Usage:
-    supernode <command> [<args>...]
-    supernode <command> -h | --help
-    supernode -h | --help
-
-Commands:
-    complete    Sets the newly created version as the current package version
-    config      Collects configuration information needed to use other commands
-    create      Creates a new package
-    update      Updates an existing package with a new version
-    upload      Uploads package contents to the SFTP infrastructure
-```
-
-### Windows
+## Windows Installation
 
 Download and install the latest Python 2.7 for Windows release:
 
@@ -97,10 +78,15 @@ Once cloned, install the client using [pip](http://www.pip-installer.org/):
 C:\> pip install ./python-client
 ```
 
-Once installed, the client will automatically be added to your path and can be run using the `supernode` command:
+Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
+
+## Commands Overview
+
+The command-line tool provides multiple commands used to create and manage packages. You can view the help for each
+command by using the `-h` or `--help` argument:
 
 ```
-C:\> supernode -h
+$ supernode -h
 Provides commands for creating and managing super node packages.
 
 Usage:
@@ -116,30 +102,15 @@ Commands:
     upload      Uploads package contents to the SFTP infrastructure
 ```
 
-## Scripts Overview
-
-The command-line tool includes the following scripts:
-
-|Script|Purpose|
-|:-----|:-------|
-|complete.py|Sets the newly created version as the current package version.|
-|config.py|Collects and stores the configuration information needed to use other commands.|
-|create.py|Creates a new package.|
-|update.py|Updates an existing package with a new version.|
-|upload.py|Uploads package contents to the SFTP infrastructure.|
-
-### Script Arguments and Help
-
-Each script has a different set of arguments. For help with a script, execute the script using the `-h` option:
+Each command will also provide its own help:
 
 ```
-$ python config.py -h
-
+$ supernode config -h
 Collects and stores the configuration information needed to use other commands.
 
 Usage:
-    config.py [options]
-    config.py -h | --help
+    supernode config [options]
+    supernode config -h | --help
 
 Options:
     --email <email>             The user e-mail address
@@ -156,23 +127,22 @@ Configurations are stored in your home folder under the file: ~/.package.config
 
 ## Creating a Package
 
-To create a new package, you must first configure the package environment. The `config.py` script will prompt you
-for any missing configuration information if it is not specified as an argument.
+To create a new package, you must first configure the package environment. The `supernode config` command will prompt you
+for any missing configuration information that is not supplied as an argument.
 
 ```
-$ python config.py --url https://manifests.sandbox.reloadedtech.com
-
+$ supernode config --url https://manifests.sandbox.reloadedtech.com
 E-mail: user@example.com
 Password: ******
 Validating credentials...
 Multiple partners were found. Please select one from the following:
 
-0. GamersFirst
-1. K2 Network
-2. Reloaded Games
-3. Reloaded Technologies
+1. GamersFirst
+2. K2 Network
+3. Reloaded Games
+4. Reloaded Technologies
 
-Please enter the number of the partner: 0
+Please enter the number of the partner: 1
 Saving configuration...
 ```
 
@@ -181,9 +151,8 @@ The package environment settings are stored in your home directory and are used 
 After configuring your environment, you create the package:
 
 ```
-$ python create.py --path "C:\Packages\Example" --run "C:\Packages\Example\Installer.exe"
+$ supernode create --path /tmp/packages/example --run /tmp/packages/example/Installer.exe
   --name "Python Client Test Package"
-
 Creating new package...
 Processing package files...
 Creating new version...
@@ -203,8 +172,7 @@ The package and version information is automatically saved in your configuration
 Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
 
 ```
-$ python upload.py
-
+$ supernode upload
 Querying upload settings...
 Connecting to server...
 Uploading files...
@@ -215,8 +183,7 @@ Uploading files...
 Once the package files have been uploaded, you can then set the current version of the package:
 
 ```
-$ python complete.py
-
+$ supernode complete
 Updating the current package version to 5255da8e35edd10a8809c8df...
 ```
 
@@ -233,8 +200,7 @@ You follow the same previous steps:
 Updating a package takes almost the same arguments as creating a package:
 
 ```
-$ python update.py --path "C:\Packages\Example2" --run "C:\Packages\Example2\Installer.exe"
-
+$ supernode create --path /tmp/packages/example2 --run /tmp/packages/example2/Installer.exe
 Processing package files...
 Creating new version...
 Adding files to version...
@@ -247,4 +213,3 @@ Package complete.
 PackageId = 5255da8e35edd10a8809c8de
 VersionId = 5255de8335edd10a8809c8e2
 ```
-
