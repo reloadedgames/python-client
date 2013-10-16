@@ -35,13 +35,13 @@ Depending on your distribution, execute the appropriate command(s):
 
 After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
 
-```
+```bash
 $ git clone https://github.com/reloadedgames/python-client.git
 ```
 
 After cloning has finished, install the program using [pip](http://www.pip-installer.org/):
 
-```
+```bash
 $ pip install ./python-client
 ```
 
@@ -68,13 +68,13 @@ library for your specific Python/Windows environment:
 
 Assuming you have [git](http://git-scm.com/) installed, clone the client repository:
 
-```
+```bat
 C:\> git clone https://github.com/reloadedgames/python-client.git
 ```
 
 Once cloned, install the client using [pip](http://www.pip-installer.org/):
 
-```
+```bat
 C:\> pip install ./python-client
 ```
 
@@ -85,7 +85,7 @@ Once installed, the client will automatically be added to your path and can be r
 The command-line tool provides multiple commands used to create and manage packages. You can view the help for each
 command by using the `-h` or `--help` argument:
 
-```
+```bash
 $ supernode -h
 Provides commands for creating and managing super node packages.
 
@@ -104,7 +104,7 @@ Commands:
 
 Each command will also provide its own help:
 
-```
+```bash
 $ supernode config -h
 Collects and stores the configuration information needed to use other commands.
 
@@ -130,7 +130,7 @@ Configurations are stored in your home folder under the file: ~/.package.config
 To create a new package, you must first configure the package environment. The `supernode config` command will prompt you
 for any missing configuration information that is not supplied as an argument.
 
-```
+```bash
 $ supernode config --url https://manifests.sandbox.reloadedtech.com
 E-mail: user@example.com
 Password: ******
@@ -150,8 +150,9 @@ The package environment settings are stored in your home directory and are used 
 
 After configuring your environment, you create the package:
 
-```
-$ supernode create --path /tmp/packages/example --run /tmp/packages/example/Installer.exe
+```bash
+$ supernode create --path /tmp/packages/example \
+  --run /tmp/packages/example/Installer.exe \
   --name "Python Client Test Package"
 Creating new package...
 Processing package files...
@@ -171,7 +172,7 @@ The package and version information is automatically saved in your configuration
 
 Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
 
-```
+```bash
 $ supernode upload
 Querying upload settings...
 Connecting to server...
@@ -182,7 +183,7 @@ Uploading files...
 
 Once the package files have been uploaded, you can then set the current version of the package:
 
-```
+```bash
 $ supernode complete
 Updating the current package version to 5255da8e35edd10a8809c8df...
 ```
@@ -199,8 +200,9 @@ You follow the same previous steps:
 
 Updating a package takes almost the same arguments as creating a package:
 
-```
-$ supernode create --path /tmp/packages/example2 --run /tmp/packages/example2/Installer.exe
+```bash
+$ supernode create --path /tmp/packages/example2 \
+  --run /tmp/packages/example2/Installer.exe
 Processing package files...
 Creating new version...
 Adding files to version...
