@@ -2,10 +2,10 @@
 Updates an existing package with a new version.
 
 Usage:
-    supernode update --path <path> --run <run>
+    supernode update --path <path>
         [--arguments <args>] [--chunk-size 1048576]
-        [--packageid <packageid>] [--type package]
-        [--version-name <name>]
+        [--packageid <packageid>] [--run <run>]
+        [--type package] [--version-name <name>]
     supernode update -h | --help
 
 Options:
@@ -49,8 +49,14 @@ class UpdateCommand(Command):
         print 'Creating new version...'
         arguments = options['--arguments']
         path_absolute = os.path.abspath(path)
-        run_path = os.path.abspath(options['--run'])
-        run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
+
+        # Run is optional
+        if options['--run'] is not None:
+            run_path = os.path.abspath(options['--run'])
+            run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
+        else:
+            run_relative_path = None
+
         version_name = options['--version-name']
         version = self.api.create_version(package_id, run_relative_path, arguments, version_name)
         version_id = version['VersionId']

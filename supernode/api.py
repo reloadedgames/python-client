@@ -82,7 +82,17 @@ class RestApi:
             'Run': run
         }
 
-        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
+        # Manually set the content-length header value if all parameter values are None
+        # This is a workaround for this annoying bug: https://github.com/kennethreitz/requests/issues/223
+        headers = {
+            'Content-Length': '0'
+        }
+
+        for key in parameters:
+            if parameters[key] is not None:
+                headers = None
+
+        response = requests.post(url, parameters, headers=headers, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure creating version')

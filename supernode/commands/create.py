@@ -2,9 +2,9 @@
 Creates a new package.
 
 Usage:
-    supernode create --path <path> --run <run> --name <name>
+    supernode create --path <path> --name <name>
         [--arguments <args>] [--chunk-size 1048576]
-        [--type package] [--version-name <name>]
+        [--run <run>] [--type package] [--version-name <name>]
     supernode create -h | --help
 
 Options:
