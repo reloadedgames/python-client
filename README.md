@@ -67,7 +67,7 @@ Download and install the latest Python 2.7 for Windows release:
 Download and install the setuptools and pip modules:
 
 - [Setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
-- [Pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
+- [Pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)
 
 Add both the Python root installation folder (`C:\Python27\`) and its scripts folder (`C:\Python27\Scripts\`)
 to your environment path variable. This will allow you to access the python and pip commands easily.
