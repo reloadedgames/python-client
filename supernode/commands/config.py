@@ -78,7 +78,7 @@ class ConfigCommand(Command):
                 print '{0}. {1}'.format(i + 1, partners[i]['Name'])
 
             print ''
-            i = int(raw_input('Please enter the number of the partner: ')) + 1
+            i = int(raw_input('Please enter the number of the partner: ')) - 1
             partner_id = partners[i]['PartnerId']
 
         self.settings['partner_id'] = partner_id
