@@ -133,7 +133,7 @@ class UpdateCommand(Command):
         """
         checksums = []
 
-        with open(path, 'r+b') as f:
+        with open(path, 'rb') as f:
             chunk = f.read(chunk_size)
 
             while chunk:
