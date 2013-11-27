@@ -95,14 +95,16 @@ class UploadClient(SFTPClient):
         @param callback: The callback function to execute while performing the upload
         @type callback: function(str, int, int)
         """
+        file_exists = False
         file_size = os.path.getsize(file_path)
         server_size = 0
 
         if self.path_exists(server_path):
+            file_exists = True
             server_size = self.stat(server_path).st_size
 
         # Skip completed files
-        if file_size == server_size:
+        if file_exists and file_size == server_size:
             return
 
         # Clean upload
@@ -123,6 +125,10 @@ class UploadClient(SFTPClient):
                 server_file.set_pipelined(True)
                 server_file.seek(offset)
                 data = local_file.read(byte_size)
+
+                # Special case for zero-byte files
+                if file_size == 0:
+                    callback(server_path, server_size, file_size)
 
                 while data:
                     server_file.write(data)

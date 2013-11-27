@@ -140,4 +140,8 @@ class UpdateCommand(Command):
                 checksums.append(binascii.crc32(chunk) & 0xffffffff)
                 chunk = f.read(chunk_size)
 
+        # In the case of a zero-byte file, just return zero
+        if len(checksums) == 0:
+            checksums.append(0)
+
         return checksums

@@ -121,7 +121,11 @@ class UploadCommand(Command):
             path = '...' + path[-max_length:]
 
         # Keep refreshing the same line until complete
-        percent = float(size) / file_size * 100
+        try:
+            percent = float(size) / file_size * 100
+        except ZeroDivisionError:
+            percent = 100 # Zero-byte files...
+
         print '\r  {0} - {1:.0f}%'.format(path, percent),
         sys.stdout.flush()
 
