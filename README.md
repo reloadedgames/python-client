@@ -129,6 +129,7 @@ Options:
     --password <password>       The user password
     --partnerid <partnerid>     The partner ID
     --url <url>                 The REST API URL
+                                    [default: https://manifests.reloadedtech.com]
 
 If passed all options, the configuration will be validated and saved.
 Otherwise, you will be prompted for the missing configuration information.
@@ -142,7 +143,7 @@ To create a new package, you must first configure the package environment. The `
 for any missing configuration information that is not supplied as an argument.
 
 ```bash
-$ supernode config --url https://manifests.sandbox.reloadedtech.com
+$ supernode config
 E-mail: user@example.com
 Password: ******
 Validating credentials...

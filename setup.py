@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='supernode',
-    version='1.0.3',
+    version='1.0.4',
     description='Python command-line client for creating and managing super node packages',
     install_requires=[
         'docopt == 0.6.1',

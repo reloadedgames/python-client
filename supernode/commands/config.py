@@ -11,6 +11,7 @@ Options:
     --password <password>       The user password
     --partnerid <partnerid>     The partner ID
     --url <url>                 The REST API URL
+                                    [default: https://manifests.reloadedtech.com]
 
 If passed all options, the configuration will be validated and saved.
 Otherwise, you will be prompted for the missing configuration information.
@@ -42,9 +43,6 @@ class ConfigCommand(Command):
 
         if password is None:
             password = getpass.getpass()
-
-        if url is None:
-            url = raw_input('URL: ')
 
         self.settings = {
             'email': email,
