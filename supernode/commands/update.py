@@ -53,6 +53,10 @@ class UpdateCommand(Command):
         # Run is optional
         if options['--run'] is not None:
             run_path = os.path.abspath(options['--run'])
+
+            if not os.path.isfile(run_path):
+                exit('Run file specified does not exist')
+
             run_relative_path = run_path.replace(path_absolute, '').lstrip('/\\')
         else:
             run_relative_path = None

@@ -1,3 +1,4 @@
 build/
 supernode.egg-info/
 dist/
+setup.cfg
