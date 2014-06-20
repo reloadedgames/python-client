@@ -22,6 +22,7 @@ current configuration.
 
 from supernode.command import Command
 import binascii
+import hashlib
 import os
 
 
@@ -70,7 +71,7 @@ class UpdateCommand(Command):
 
         for f in package_files:
             print '  {0}'.format(f['path'])
-            self.api.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'])
+            self.api.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'], f['md5'])
 
         # Complete the version
         print 'Marking the version as complete...'
@@ -92,11 +93,9 @@ class UpdateCommand(Command):
         Recursively reads all of the files in the specified path and returns a list of tuples
         representing them with their appropriate CRC values based on the chunk_size
 
-        @param path: The directory file path
         @type path: str
-        @param chunk_size: The chunk file size
         @type chunk_size: int
-        @rtype : list
+        @rtype: list of dict
         """
         if not os.path.isdir(path):
             exit('The path specified is not a directory')
@@ -114,9 +113,10 @@ class UpdateCommand(Command):
                 file_path = os.path.join(root, f)
                 file_path_relative = file_path.replace(path, '').lstrip('/\\')
                 size = os.path.getsize(file_path)
-                checksums = self.calculate_checksums(file_path, chunk_size)
+                md5, checksums = self.calculate_checksums(file_path, chunk_size)
 
                 package_files.append({
+                    'md5': md5,
                     'path': file_path_relative,
                     'size': size,
                     'checksums': checksums
@@ -127,25 +127,26 @@ class UpdateCommand(Command):
     @staticmethod
     def calculate_checksums(path, chunk_size):
         """
-        Returns the CRC values for each chunk of the specified file
+        Returns the the file's MD5 and its individual CRC chunk values
 
-        @param path: The path to the file
         @type path: str
-        @param chunk_size: The file chunk size
         @type chunk_size: int
-        @rtype : list
+        @rtype: tuple
         """
         checksums = []
+        md5 = hashlib.md5()
 
         with open(path, 'rb') as f:
             chunk = f.read(chunk_size)
 
             while chunk:
                 checksums.append(binascii.crc32(chunk) & 0xffffffff)
+                md5.update(chunk)
                 chunk = f.read(chunk_size)
 
         # In the case of a zero-byte file, just return zero
         if len(checksums) == 0:
             checksums.append(0)
+            md5.update('')
 
-        return checksums
+        return md5.hexdigest(), checksums

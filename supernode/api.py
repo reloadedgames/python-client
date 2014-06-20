@@ -99,7 +99,7 @@ class RestApi:
 
         return response.json()
 
-    def add_file(self, version_id, path, size, chunk_size, checksums):
+    def add_file(self, version_id, path, size, chunk_size, checksums, md5):
         """
         Adds the file to the package version
 
@@ -112,6 +112,8 @@ class RestApi:
         @param chunk_size: The size of each file chunk
         @type chunk_size: long
         @param checksums: A list of checksum values
+        @param md5: The MD5 hex of the file
+        @type md5: str
         @type checksums: list
 
         """
@@ -119,6 +121,7 @@ class RestApi:
         parameters = {
             'Checksums': ','.join(str(i) for i in checksums),
             'Chunk': chunk_size,
+            'MD5': md5,
             'Path': path,
             'Size': size
         }
