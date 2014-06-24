@@ -6,7 +6,7 @@ setup(
     description='Python command-line client for creating and managing super node packages',
     install_requires=[
         'docopt == 0.6.1',
-        'paramiko >= 1.12.0',
+        'paramiko == 1.12.0',
         'pycrypto >= 2.6',
         'requests >= 2.0'
     ],
