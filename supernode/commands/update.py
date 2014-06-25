@@ -73,17 +73,12 @@ class UpdateCommand(Command):
             print '  {0}'.format(f['path'])
             self.api.add_file(version_id, f['path'], f['size'], chunk_size, f['checksums'], f['md5'])
 
-        # Complete the version
-        print 'Marking the version as complete...'
-        self.api.complete_version(version_id)
-
         print 'Saving package information to configuration...'
         self.settings['package_id'] = package_id
         self.settings['version_id'] = version_id
         self.settings['path'] = path_absolute
         self.save_settings()
 
-        print 'Package complete.'
         print ''
         print 'PackageId = {0}'.format(package_id)
         print 'VersionId = {0}'.format(version_id)

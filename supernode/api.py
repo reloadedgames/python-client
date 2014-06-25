@@ -131,18 +131,33 @@ class RestApi:
         if response.status_code != 200:
             raise Exception('Failure adding file')
 
-    def complete_version(self, version_id):
+    def complete_upload(self, version_id):
         """
-        Marks the version as complete after all of the files have been added
+        Marks the version as completely uploaded
 
-        @param version_id: The primary key of the version
-        @type version_id: str
+        @type version_id str
         """
-        url = '{0}/versions/{1}/complete'.format(self.url, version_id)
+        url = '{0}/versions/{1}/upload-complete'.format(self.url, version_id)
         response = requests.post(url, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure completing version')
+
+    def get_upload_credentials(self, version_id):
+        """
+        Returns the upload credentials for the version
+
+        @type version_id str
+        @rtype: dict
+        """
+
+        url = '{0}/versions/{1}/upload-credentials'.format(self.url, version_id)
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure querying upload credentials')
+
+        return response.json()
 
     def get_upload_settings(self, partner_id):
         """
