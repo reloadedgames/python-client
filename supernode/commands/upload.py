@@ -6,6 +6,7 @@ Usage:
 """
 
 import boto
+import math
 import os
 import sys
 
@@ -56,14 +57,41 @@ class UploadCommand(Command):
                 #    continue
 
                 global progress
-                widgets = [os.path.basename(local_path) + ' ', Percentage(), ' ', Bar(), ' ', FileTransferSpeed()]
-                progress_size = size if size > 0 else 1
-                progress = ProgressBar(widgets=widgets, maxval=progress_size)
-                progress.start()
 
-                key = bucket.new_key(key_name)
-                key.set_contents_from_filename(local_path, cb=self.update_progress, num_cb=100)
-                progress.finish()
+                # Objects over 5GB must be uploading using multipart
+                multipart_required = (size >= 5368709120)
+
+                if multipart_required:
+                    with open(local_path, 'rb') as fp:
+                        chunk_size = 67108864
+                        chunks = int(math.ceil(size / float(chunk_size)))
+                        multipart = bucket.initiate_multipart_upload(key_name)
+
+                        for i in range(chunks):
+                            part = i + 1
+                            part_size = chunk_size
+
+                            if part * chunk_size >= size:
+                                part_size = size - (part - 1 * chunk_size) - 1
+
+                            widgets = [os.path.basename(local_path) + ' ({0}/{1})'.format(part, chunks), Percentage(),
+                                       ' ', Bar(), ' ', FileTransferSpeed()]
+                            progress = ProgressBar(widgets=widgets, maxval=part_size)
+                            progress.start()
+
+                            multipart.upload_part_from_file(fp, part, size=part_size,
+                                                            cb=self.update_progress, num_cb=100)
+                            progress.finish()
+
+                        multipart.complete_upload()
+
+                else:
+                    widgets = [os.path.basename(local_path) + ' ', Percentage(), ' ', Bar(), ' ', FileTransferSpeed()]
+                    progress = ProgressBar(widgets=widgets, maxval=size if size > 0 else 1)
+                    progress.start()
+                    key = bucket.new_key(key_name)
+                    key.set_contents_from_filename(local_path, cb=self.update_progress, num_cb=100)
+                    progress.finish()
 
         #self.api.complete_upload(version_id)
         print 'Upload complete.'

@@ -99,6 +99,21 @@ class RestApi:
 
         return response.json()
 
+    def get_version(self, version_id):
+        """
+        Returns the version information
+
+        @type version_id str
+        @rtype: dict
+        """
+        url = '{0}/versions/{1}'.format(self.url, version_id)
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure querying version information')
+
+        return response.json()
+
     def add_file(self, version_id, path, size, chunk_size, checksums, md5):
         """
         Adds the file to the package version
