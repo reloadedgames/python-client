@@ -8,12 +8,8 @@ Usage:
 import boto
 import math
 import os
-import sys
 
-from progressbar import Bar, FileTransferSpeed, Percentage, ProgressBar
 from supernode.command import Command
-
-progress = None
 
 
 class UploadCommand(Command):
@@ -38,12 +34,6 @@ class UploadCommand(Command):
 
         bucket = s3.get_bucket(credentials['BucketName'], validate=False)
 
-        # Build a list of existing keys and their sizes to avoid re-uploading existing files
-        keys = {}
-
-        for key in bucket.list(prefix):
-            keys[key.name] = key.size
-
         print 'Uploading files...'
 
         for root, dirs, files in os.walk(path):
@@ -53,52 +43,28 @@ class UploadCommand(Command):
                 key_name = prefix + relative_path
                 size = os.path.getsize(local_path)
 
-                #if key_name in keys and keys[key_name] == size:
-                #    continue
+                print relative_path
 
-                global progress
-
-                # Objects over 5GB must be uploading using multipart
-                multipart_required = (size >= 5368709120)
-
-                if multipart_required:
-                    with open(local_path, 'rb') as fp:
-                        chunk_size = 67108864
-                        chunks = int(math.ceil(size / float(chunk_size)))
-                        multipart = bucket.initiate_multipart_upload(key_name)
-
-                        for i in range(chunks):
-                            part = i + 1
-                            part_size = chunk_size
-
-                            if part * chunk_size >= size:
-                                part_size = size - (part - 1 * chunk_size) - 1
-
-                            widgets = [os.path.basename(local_path) + ' ({0}/{1})'.format(part, chunks), Percentage(),
-                                       ' ', Bar(), ' ', FileTransferSpeed()]
-                            progress = ProgressBar(widgets=widgets, maxval=part_size)
-                            progress.start()
-
-                            multipart.upload_part_from_file(fp, part, size=part_size,
-                                                            cb=self.update_progress, num_cb=100)
-                            progress.finish()
-
-                        multipart.complete_upload()
-
-                else:
-                    widgets = [os.path.basename(local_path) + ' ', Percentage(), ' ', Bar(), ' ', FileTransferSpeed()]
-                    progress = ProgressBar(widgets=widgets, maxval=size if size > 0 else 1)
-                    progress.start()
+                # Files smaller than 50MB can be uploaded directly
+                if size <= 52428800:
                     key = bucket.new_key(key_name)
-                    key.set_contents_from_filename(local_path, cb=self.update_progress, num_cb=100)
-                    progress.finish()
+                    key.set_contents_from_filename(local_path)
+                    continue
 
-        #self.api.complete_upload(version_id)
+                # Use multipart upload
+                multipart = bucket.initiate_multipart_upload(key_name)
+                bytes_per_chunk = max(int(math.sqrt(5242880) * math.sqrt(size)), 5242880)
+                chunks_count = int(math.ceil(size / float(bytes_per_chunk)))
+
+                with open(local_path, 'rb') as fp:
+                    for i in range(chunks_count):
+                        offset = i * bytes_per_chunk
+                        remaining_bytes = size - offset
+                        part_size = min([bytes_per_chunk, remaining_bytes])
+                        part_number = i + 1
+
+                        multipart.upload_part_from_file(fp, part_number, size=part_size)
+
+                    multipart.complete_upload()
+
         print 'Upload complete.'
-
-    @staticmethod
-    def update_progress(current, total):
-        if total == 0:
-            current = 1
-
-        progress.update(current)

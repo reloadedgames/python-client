@@ -99,21 +99,6 @@ class RestApi:
 
         return response.json()
 
-    def get_version(self, version_id):
-        """
-        Returns the version information
-
-        @type version_id str
-        @rtype: dict
-        """
-        url = '{0}/versions/{1}'.format(self.url, version_id)
-        response = requests.get(url, auth=self.auth(), verify=self.verify)
-
-        if response.status_code != 200:
-            raise Exception('Failure querying version information')
-
-        return response.json()
-
     def add_file(self, version_id, path, size, chunk_size, checksums, md5):
         """
         Adds the file to the package version
@@ -173,45 +158,6 @@ class RestApi:
             raise Exception('Failure querying upload credentials')
 
         return response.json()
-
-    def get_upload_settings(self, partner_id):
-        """
-        Pulls the upload settings from the REST API
-
-        @param partner_id: The primary key of the partner
-        @type partner_id: str
-        @rtype : dict
-        """
-        response = requests.get('{0}/settings/upload'.format(self.url), verify=self.verify)
-
-        if response.status_code != 200:
-            raise Exception('Failure querying upload settings')
-
-        json = response.json()
-
-        return {
-            'host': json['Host'],
-            'port': int(json['Port']),
-            'fingerprint': json['Fingerprints']['DSA'],
-            'username': partner_id,
-            'private_key': self.get_private_key(partner_id)
-        }
-
-    def get_private_key(self, partner_id):
-        """
-        Queries the private key for the partner from the REST API
-
-        @param partner_id: The primary key of the partner
-        @type partner_id: str
-        @rtype : str
-        """
-        url = '{0}/partners/{1}/private-key'.format(self.url, partner_id)
-        response = requests.get(url, auth=self.auth(), verify=self.verify)
-
-        if response.status_code != 200:
-            raise Exception('Failure querying private key')
-
-        return response.content
 
     def set_version(self, package_id, version_id):
         """
