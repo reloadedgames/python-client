@@ -2,7 +2,12 @@
 Uploads the package contents to the S3 origin bucket.
 
 Usage:
-    supernode upload
+    supernode upload [options]
+    supernode upload -h | --help
+
+Options:
+    --no-resume         Do not resume multipart uploads
+    --no-skip           Do not skip files which have already been uploaded
 """
 
 import boto
@@ -33,6 +38,17 @@ class UploadCommand(Command):
                              security_token=credentials['SessionToken'])
 
         bucket = s3.get_bucket(credentials['BucketName'], validate=False)
+        keys = []
+
+        if not options['--no-skip']:
+            print 'Querying existing objects...'
+            keys = list(bucket.list(prefix))
+
+        multipart_uploads = []
+
+        if not options['--no-resume']:
+            print 'Querying multipart uploads...'
+            multipart_uploads = list(bucket.list_multipart_uploads())
 
         print 'Uploading files...'
 
@@ -43,6 +59,10 @@ class UploadCommand(Command):
                 key_name = prefix + relative_path
                 size = os.path.getsize(local_path)
 
+                # Skip files that have already been uploaded
+                if (key_name, size) in [(k.name, k.size) for k in keys]:
+                    continue
+
                 print relative_path
 
                 # Files smaller than 50MB can be uploaded directly
@@ -51,17 +71,27 @@ class UploadCommand(Command):
                     key.set_contents_from_filename(local_path)
                     continue
 
-                # Use multipart upload
-                multipart = bucket.initiate_multipart_upload(key_name)
+                # Continue the last multipart upload?
+                matching_uploads = [u for u in multipart_uploads if u.key_name == key_name]
+
+                if matching_uploads:
+                    multipart = matching_uploads[-1]
+                else:
+                    bucket.initiate_multipart_upload(key_name)
+
                 bytes_per_chunk = max(int(math.sqrt(5242880) * math.sqrt(size)), 5242880)
                 chunks_count = int(math.ceil(size / float(bytes_per_chunk)))
+                parts = multipart.get_all_parts()
 
                 with open(local_path, 'rb') as fp:
                     for i in range(chunks_count):
+                        part_number = i + 1
                         offset = i * bytes_per_chunk
                         remaining_bytes = size - offset
                         part_size = min([bytes_per_chunk, remaining_bytes])
-                        part_number = i + 1
+
+                        if (part_number, part_size) in [(p.part_number, p.size) for p in parts]:
+                            continue
 
                         multipart.upload_part_from_file(fp, part_number, size=part_size)
 
