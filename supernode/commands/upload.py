@@ -10,17 +10,18 @@ Options:
     --no-skip           Do not skip files which have already been uploaded
 """
 
-# This must be first so it can replace the built-in http/url methods
-# with the gevent versions for use by boto
-import gevent.monkey
-gevent.monkey.patch_all()
-
 import boto
+import gevent
+import functools
 import math
 import os
 
 from boto.s3.multipart import MultiPartUpload
+from progressbar import ETA, FileTransferSpeed, Percentage, ProgressBar, WidgetHFill
 from supernode.command import Command
+
+# The upload progress bar
+progress = None
 
 
 class UploadCommand(Command):
@@ -66,12 +67,12 @@ class UploadCommand(Command):
                 if (key_name, size) in [(k.name, k.size) for k in keys]:
                     continue
 
-                print relative_path
-
                 # Files smaller than 50MB can be uploaded directly
                 if size <= 52428800:
                     key = bucket.new_key(key_name)
-                    key.set_contents_from_filename(local_path)
+                    progress_bar = self.create_progress_bar(relative_path, size)
+                    key.set_contents_from_filename(local_path, cb=self.update_progress, num_cb=100)
+                    progress_bar.finish()
                     continue
 
                 # Continue the last multipart upload?
@@ -82,7 +83,7 @@ class UploadCommand(Command):
                 else:
                     multipart = bucket.initiate_multipart_upload(key_name)
 
-                ParallelUpload(credentials, key_name, multipart.id, local_path).upload()
+                ParallelUpload(credentials, key_name, multipart.id, local_path, relative_path).upload()
 
         print 'Upload complete.'
 
@@ -93,9 +94,29 @@ class UploadCommand(Command):
 
         return s3.get_bucket(credentials['BucketName'], validate=False)
 
+    @staticmethod
+    def create_progress_bar(name, size):
+        if size == 0:
+            size = 1
+
+        global progress
+        widgets = [Percentage(), ' ', NameWidget(name), ' ', FileTransferSpeed(), ' ', ETA()]
+        progress = ProgressBar(widgets=widgets, maxval=size)
+        progress.start()
+
+        return progress
+
+    @staticmethod
+    def update_progress(current, total):
+        if total == 1:
+            current = 1
+
+        global progress
+        progress.update(current)
+
 
 class ParallelUpload(object):
-    def __init__(self, credentials, key_name, multipart_id, path):
+    def __init__(self, credentials, key_name, multipart_id, path, relative_path):
         file_size = os.path.getsize(path)
 
         self.__chunk_size = max(int(math.sqrt(5242880) * math.sqrt(file_size)), 5242880)
@@ -105,6 +126,9 @@ class ParallelUpload(object):
         self.__key_name = key_name
         self.__multipart_id = multipart_id
         self.__path = path
+        self.__progress = [0] * self.__chunk_count
+        self.__relative_path = relative_path
+        self.__progress_bar = UploadCommand.create_progress_bar(self.__relative_path, file_size)
 
     def _get_multipart(self):
         bucket = UploadCommand.get_bucket(self.__credentials)
@@ -119,7 +143,17 @@ class ParallelUpload(object):
 
         with open(self.__path, 'rb') as f:
             f.seek(offset)
-            multipart.upload_part_from_file(f, part_number, size=size)
+
+            multipart.upload_part_from_file(f, part_number,
+                                            cb=functools.partial(self._update_progress, part_number),
+                                            num_cb=100,
+                                            size=size)
+
+    def _update_progress(self, part_number, current, total):
+        self.__progress[part_number - 1] = current
+        sum_current = sum(self.__progress)
+
+        UploadCommand.update_progress(sum_current, self.__file_size)
 
     def upload(self):
         multipart = self._get_multipart()
@@ -138,4 +172,18 @@ class ParallelUpload(object):
             greenlets.append(gevent.spawn(self._upload_part, part_number, offset, part_size))
 
         gevent.joinall(greenlets)
+        self.__progress_bar.finish()
         multipart.complete_upload()
+
+
+class NameWidget(WidgetHFill):
+    def __init__(self, name):
+        self.__name = name
+
+    def update(self, pbar, width):
+        name = self.__name
+
+        if len(name) > width:
+            name = '...' + name[-width + 3:]
+
+        return name + ''.ljust(width - len(name))

@@ -14,6 +14,11 @@ Commands:
     upload      Uploads package contents to the SFTP infrastructure
 """
 
+# This must be first so it can replace the built-in http/url methods
+# with the gevent versions for use by boto
+import gevent.monkey
+gevent.monkey.patch_all()
+
 from commands.complete import CompleteCommand
 from commands.config import ConfigCommand
 from commands.create import CreateCommand
