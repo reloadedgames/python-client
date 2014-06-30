@@ -10,13 +10,16 @@ Options:
     --no-skip           Do not skip files which have already been uploaded
 """
 
+# This must be first so it can replace the built-in http/url methods
+# with the gevent versions for use by boto
+import gevent.monkey
+gevent.monkey.patch_all()
+
 import boto
 import math
-import multiprocessing
 import os
-from boto.s3.multipart import MultiPartUpload
 
-from concurrent.futures import ProcessPoolExecutor
+from boto.s3.multipart import MultiPartUpload
 from supernode.command import Command
 
 
@@ -37,7 +40,7 @@ class UploadCommand(Command):
         prefix = credentials['KeyPrefix']
 
         print 'Connecting to S3 bucket...'
-        bucket = _get_bucket(credentials)
+        bucket = self.get_bucket(credentials)
         keys = []
 
         if not options['--no-skip']:
@@ -79,48 +82,60 @@ class UploadCommand(Command):
                 else:
                     multipart = bucket.initiate_multipart_upload(key_name)
 
-                bytes_per_chunk = max(int(math.sqrt(5242880) * math.sqrt(size)), 5242880)
-                chunks_count = int(math.ceil(size / float(bytes_per_chunk)))
-                parts = multipart.get_all_parts()
-
-                # Pool for parallel uploading
-                workers = multiprocessing.cpu_count() * 2
-                with ProcessPoolExecutor(max_workers=workers) as pool:
-                    futures = []
-
-                    for i in range(chunks_count):
-                        part_number = i + 1
-                        offset = i * bytes_per_chunk
-                        remaining_bytes = size - offset
-                        part_size = min([bytes_per_chunk, remaining_bytes])
-
-                        if (part_number, part_size) in [(p.part_number, p.size) for p in parts]:
-                            continue
-
-                        futures.append(pool.submit(_upload_multipart, credentials, multipart.id, key_name,
-                                                   local_path, part_number, offset, part_size))
-
-                    for future in futures:
-                        future.result(timeout=1800)
-
-                multipart.complete_upload()
+                ParallelUpload(credentials, key_name, multipart.id, local_path).upload()
 
         print 'Upload complete.'
 
+    @staticmethod
+    def get_bucket(credentials):
+        s3 = boto.connect_s3(credentials['AccessKeyId'], credentials['SecretAccessKey'],
+                             security_token=credentials['SessionToken'])
 
-def _get_bucket(credentials):
-    s3 = boto.connect_s3(credentials['AccessKeyId'], credentials['SecretAccessKey'],
-                         security_token=credentials['SessionToken'])
-
-    return s3.get_bucket(credentials['BucketName'], validate=False)
+        return s3.get_bucket(credentials['BucketName'], validate=False)
 
 
-def _upload_multipart(credentials, multipart_id, key_name, path, part_number, offset, size):
-    bucket = _get_bucket(credentials)
-    multipart = MultiPartUpload(bucket)
-    multipart.id = multipart_id
-    multipart.key_name = key_name
+class ParallelUpload(object):
+    def __init__(self, credentials, key_name, multipart_id, path):
+        file_size = os.path.getsize(path)
 
-    with open(path, 'rb') as f:
-        f.seek(offset)
-        multipart.upload_part_from_file(f, part_number, size=size)
+        self.__chunk_size = max(int(math.sqrt(5242880) * math.sqrt(file_size)), 5242880)
+        self.__chunk_count = int(math.ceil(file_size / float(self.__chunk_size)))
+        self.__credentials = credentials
+        self.__file_size = file_size
+        self.__key_name = key_name
+        self.__multipart_id = multipart_id
+        self.__path = path
+
+    def _get_multipart(self):
+        bucket = UploadCommand.get_bucket(self.__credentials)
+        multipart = MultiPartUpload(bucket)
+        multipart.id = self.__multipart_id
+        multipart.key_name = self.__key_name
+
+        return multipart
+
+    def _upload_part(self, part_number, offset, size):
+        multipart = self._get_multipart()
+
+        with open(self.__path, 'rb') as f:
+            f.seek(offset)
+            multipart.upload_part_from_file(f, part_number, size=size)
+
+    def upload(self):
+        multipart = self._get_multipart()
+        parts = multipart.get_all_parts()
+        greenlets = []
+
+        for i in range(self.__chunk_count):
+            part_number = i + 1
+            offset = i * self.__chunk_size
+            remaining_bytes = self.__file_size - offset
+            part_size = min([self.__chunk_size, remaining_bytes])
+
+            if (part_number, part_size) in [(p.part_number, p.size) for p in parts]:
+                continue
+
+            greenlets.append(gevent.spawn(self._upload_part, part_number, offset, part_size))
+
+        gevent.joinall(greenlets)
+        multipart.complete_upload()

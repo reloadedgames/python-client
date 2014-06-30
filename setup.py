@@ -7,6 +7,7 @@ setup(
     install_requires=[
         'boto == 2.29.1',
         'docopt == 0.6.1',
+        'gevent == 1.0.1',
         'requests >= 2.0'
     ],
     packages=find_packages(),
