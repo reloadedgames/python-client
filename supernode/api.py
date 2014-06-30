@@ -158,22 +158,3 @@ class RestApi:
             raise Exception('Failure querying upload credentials')
 
         return response.json()
-
-    def set_version(self, package_id, version_id):
-        """
-        Sends the API request updating the package version
-
-        @param package_id: The primary key of the package
-        @type package_id: str
-        @param version_id: The primary key of the version
-        @type version_id: string
-        """
-        url = '{0}/packages/{1}'.format(self.url, package_id)
-        parameters = {
-            'VersionId': version_id
-        }
-
-        response = requests.put(url, parameters, auth=self.auth(), verify=self.verify)
-
-        if response.status_code != 200:
-            raise Exception('Failure setting package version')

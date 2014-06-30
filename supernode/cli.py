@@ -19,7 +19,6 @@ Commands:
 import gevent.monkey
 gevent.monkey.patch_all()
 
-from commands.complete import CompleteCommand
 from commands.config import ConfigCommand
 from commands.create import CreateCommand
 from commands.update import UpdateCommand
@@ -33,9 +32,7 @@ def main():
     command = None
     options = [command_name] + args['<args>']
 
-    if command_name == 'complete':
-        command = CompleteCommand()
-    elif command_name == 'config':
+    if command_name == 'config':
         command = ConfigCommand()
     elif command_name == 'create':
         command = CreateCommand()
