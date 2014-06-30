@@ -6,6 +6,7 @@ Usage:
     supernode upload -h | --help
 
 Options:
+    --no-complete       Do not mark as the package version as uploaded
     --no-resume         Do not resume multipart uploads
     --no-skip           Do not skip files which have already been uploaded
 """
@@ -86,7 +87,9 @@ class UploadCommand(Command):
                 # Let the class handle the multipart upload
                 ParallelUpload(credentials, key_name, multipart.id, local_path, relative_path).upload()
 
-        self.api.complete_upload(version_id)
+        if not options['--no-complete']:
+            self.api.complete_upload(version_id)
+
         print 'Upload complete.'
 
     @staticmethod
