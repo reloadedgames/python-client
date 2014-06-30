@@ -12,8 +12,11 @@ Options:
 
 import boto
 import math
+import multiprocessing
 import os
+from boto.s3.multipart import MultiPartUpload
 
+from concurrent.futures import ProcessPoolExecutor
 from supernode.command import Command
 
 
@@ -34,10 +37,7 @@ class UploadCommand(Command):
         prefix = credentials['KeyPrefix']
 
         print 'Connecting to S3 bucket...'
-        s3 = boto.connect_s3(credentials['AccessKeyId'], credentials['SecretAccessKey'],
-                             security_token=credentials['SessionToken'])
-
-        bucket = s3.get_bucket(credentials['BucketName'], validate=False)
+        bucket = _get_bucket(credentials)
         keys = []
 
         if not options['--no-skip']:
@@ -77,13 +77,17 @@ class UploadCommand(Command):
                 if matching_uploads:
                     multipart = matching_uploads[-1]
                 else:
-                    bucket.initiate_multipart_upload(key_name)
+                    multipart = bucket.initiate_multipart_upload(key_name)
 
                 bytes_per_chunk = max(int(math.sqrt(5242880) * math.sqrt(size)), 5242880)
                 chunks_count = int(math.ceil(size / float(bytes_per_chunk)))
                 parts = multipart.get_all_parts()
 
-                with open(local_path, 'rb') as fp:
+                # Pool for parallel uploading
+                workers = multiprocessing.cpu_count() * 2
+                with ProcessPoolExecutor(max_workers=workers) as pool:
+                    futures = []
+
                     for i in range(chunks_count):
                         part_number = i + 1
                         offset = i * bytes_per_chunk
@@ -93,8 +97,30 @@ class UploadCommand(Command):
                         if (part_number, part_size) in [(p.part_number, p.size) for p in parts]:
                             continue
 
-                        multipart.upload_part_from_file(fp, part_number, size=part_size)
+                        futures.append(pool.submit(_upload_multipart, credentials, multipart.id, key_name,
+                                                   local_path, part_number, offset, part_size))
 
-                    multipart.complete_upload()
+                    for future in futures:
+                        future.result(timeout=1800)
+
+                multipart.complete_upload()
 
         print 'Upload complete.'
+
+
+def _get_bucket(credentials):
+    s3 = boto.connect_s3(credentials['AccessKeyId'], credentials['SecretAccessKey'],
+                         security_token=credentials['SessionToken'])
+
+    return s3.get_bucket(credentials['BucketName'], validate=False)
+
+
+def _upload_multipart(credentials, multipart_id, key_name, path, part_number, offset, size):
+    bucket = _get_bucket(credentials)
+    multipart = MultiPartUpload(bucket)
+    multipart.id = multipart_id
+    multipart.key_name = key_name
+
+    with open(path, 'rb') as f:
+        f.seek(offset)
+        multipart.upload_part_from_file(f, part_number, size=size)
