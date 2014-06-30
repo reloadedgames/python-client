@@ -12,17 +12,23 @@ Options:
 """
 
 import boto
-import gevent
 import functools
+import gevent
 import math
+import multiprocessing
 import os
 
 from boto.s3.multipart import MultiPartUpload
+from gevent.pool import Pool
 from progressbar import ETA, FileTransferSpeed, Percentage, ProgressBar, WidgetHFill
 from supernode.command import Command
 
 # The upload progress bar is tied to the console, so it's global
 progress = None
+
+MINIMUM_CHUNK_SIZE = 5 * 1024 * 1024
+MINIMUM_MULTIPART_SIZE = 2 * MINIMUM_CHUNK_SIZE
+MAXIMUM_COPY_SIZE = 5 * 1024 * 1024 * 1024
 
 
 class UploadCommand(Command):
@@ -68,8 +74,8 @@ class UploadCommand(Command):
                 if (key_name, size) in [(k.name, k.size) for k in keys]:
                     continue
 
-                # Files smaller than 50MB can be uploaded directly
-                if size <= 52428800:
+                # Smaller files can be uploaded directly
+                if size <= MINIMUM_MULTIPART_SIZE:
                     key = bucket.new_key(key_name)
                     progress_bar = self.create_progress_bar(relative_path, size)
                     key.set_contents_from_filename(local_path, cb=self.update_progress, num_cb=100)
@@ -156,7 +162,7 @@ class ParallelUpload(object):
         """
         file_size = os.path.getsize(path)
 
-        self.__chunk_size = max(int(math.sqrt(5242880) * math.sqrt(file_size)), 5242880)
+        self.__chunk_size = max(int(math.sqrt(MINIMUM_CHUNK_SIZE) * math.sqrt(file_size)), MINIMUM_CHUNK_SIZE)
         self.__chunk_count = int(math.ceil(file_size / float(self.__chunk_size)))
         self.__credentials = credentials
         self.__file_size = file_size
@@ -211,13 +217,32 @@ class ParallelUpload(object):
 
         UploadCommand.update_progress(sum_current, self.__file_size)
 
+    def _copy_key(self):
+        """
+        Restores the etag for the key by copying the key over itself
+        """
+        if self.__file_size > MAXIMUM_COPY_SIZE:
+            return
+
+        def copy_key(credentials, key_name):
+            bucket = UploadCommand.get_bucket(credentials)
+            key = bucket.get_key(key_name)
+            bucket.copy_key(key.name, bucket.name, key.name, metadata=key.metadata)
+
+        gevent.spawn(copy_key, self.__credentials, self.__key_name)
+        gevent.sleep()
+
     def upload(self):
         """
         Kicks off the multipart upload
         """
         multipart = self._get_multipart()
         parts = multipart.get_all_parts()
-        greenlets = []
+
+        # Use a pool to limit the number of parallel uploads
+        cpu_count = multiprocessing.cpu_count()
+        workers = cpu_count * 2 if cpu_count > 1 else 4
+        pool = Pool(size=workers)
 
         for i in range(self.__chunk_count):
             part_number = i + 1
@@ -226,13 +251,15 @@ class ParallelUpload(object):
             part_size = min([self.__chunk_size, remaining_bytes])
 
             if (part_number, part_size) in [(p.part_number, p.size) for p in parts]:
+                self.__progress_bar.maxval -= part_size
                 continue
 
-            greenlets.append(gevent.spawn(self._upload_part, part_number, offset, part_size))
+            pool.spawn(self._upload_part, part_number, offset, part_size)
 
-        gevent.joinall(greenlets)
+        pool.join()
         self.__progress_bar.finish()
         multipart.complete_upload()
+        self._copy_key()
 
 
 class NameWidget(WidgetHFill):
