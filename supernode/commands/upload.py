@@ -20,7 +20,7 @@ from boto.s3.multipart import MultiPartUpload
 from progressbar import ETA, FileTransferSpeed, Percentage, ProgressBar, WidgetHFill
 from supernode.command import Command
 
-# The upload progress bar
+# The upload progress bar is tied to the console, so it's global
 progress = None
 
 
@@ -83,12 +83,20 @@ class UploadCommand(Command):
                 else:
                     multipart = bucket.initiate_multipart_upload(key_name)
 
+                # Let the class handle the multipart upload
                 ParallelUpload(credentials, key_name, multipart.id, local_path, relative_path).upload()
 
+        self.api.complete_upload(version_id)
         print 'Upload complete.'
 
     @staticmethod
     def get_bucket(credentials):
+        """
+        Returns the S3 Bucket instance using the supplied credentials
+
+        @type credentials dict
+        @rtype: Bucket
+        """
         s3 = boto.connect_s3(credentials['AccessKeyId'], credentials['SecretAccessKey'],
                              security_token=credentials['SessionToken'])
 
@@ -96,7 +104,14 @@ class UploadCommand(Command):
 
     @staticmethod
     def create_progress_bar(name, size):
-        if size == 0:
+        """
+        Initializes the global progress bar and returns it
+
+        @type name str
+        @type size int
+        @rtype: ProgressBar
+        """
+        if size == 0:  # Zero-byte files
             size = 1
 
         global progress
@@ -108,7 +123,13 @@ class UploadCommand(Command):
 
     @staticmethod
     def update_progress(current, total):
-        if total == 1:
+        """
+        Updates the progress bar being displayed
+
+        @type current int
+        @type total int
+        """
+        if total == 1:  # Zero-byte files
             current = 1
 
         global progress
@@ -116,7 +137,20 @@ class UploadCommand(Command):
 
 
 class ParallelUpload(object):
+    """
+    This class handles uploading a file using the S3 multipart upload capabilities
+    It uses gevent/greenlets to do parallel uploading of the chunks
+    """
     def __init__(self, credentials, key_name, multipart_id, path, relative_path):
+        """
+        Initializes the multipart upload
+
+        @type credentials dict
+        @type key_name str
+        @type multipart_id str
+        @type path str
+        @type relative_path str
+        """
         file_size = os.path.getsize(path)
 
         self.__chunk_size = max(int(math.sqrt(5242880) * math.sqrt(file_size)), 5242880)
@@ -131,6 +165,11 @@ class ParallelUpload(object):
         self.__progress_bar = UploadCommand.create_progress_bar(self.__relative_path, file_size)
 
     def _get_multipart(self):
+        """
+        Returns a MultiPartUpload object for the current upload
+
+        @rtype: MultiPartUpload
+        """
         bucket = UploadCommand.get_bucket(self.__credentials)
         multipart = MultiPartUpload(bucket)
         multipart.id = self.__multipart_id
@@ -139,6 +178,13 @@ class ParallelUpload(object):
         return multipart
 
     def _upload_part(self, part_number, offset, size):
+        """
+        Uploads a single part of the multipart upload
+
+        @type part_number int
+        @type offset int
+        @type size int
+        """
         multipart = self._get_multipart()
 
         with open(self.__path, 'rb') as f:
@@ -150,12 +196,22 @@ class ParallelUpload(object):
                                             size=size)
 
     def _update_progress(self, part_number, current, total):
+        """
+        Updates the progress bar with the current status of the multipart upload
+
+        @type part_number int
+        @type current int
+        @type total int
+        """
         self.__progress[part_number - 1] = current
         sum_current = sum(self.__progress)
 
         UploadCommand.update_progress(sum_current, self.__file_size)
 
     def upload(self):
+        """
+        Kicks off the multipart upload
+        """
         multipart = self._get_multipart()
         parts = multipart.get_all_parts()
         greenlets = []
@@ -177,13 +233,26 @@ class ParallelUpload(object):
 
 
 class NameWidget(WidgetHFill):
+    """
+    This progress bar widget fills the empty space like a Bar() widget would do
+    """
     def __init__(self, name):
+        """
+        @type name str
+        """
         self.__name = name
 
     def update(self, pbar, width):
+        """
+        @type pbar ProgressBar
+        @type width int
+        @rtype: str
+        """
         name = self.__name
 
+        # Cap the text to fit in the specified width
         if len(name) > width:
             name = '...' + name[-width + 3:]
 
+        # Fill in the rest of the width with empty spaces
         return name + ''.ljust(width - len(name))
