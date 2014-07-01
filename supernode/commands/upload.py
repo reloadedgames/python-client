@@ -6,16 +6,14 @@ Usage:
     supernode upload -h | --help
 
 Options:
-    --no-complete       Do not mark as the package version as uploaded
-    --no-resume         Do not resume multipart uploads
-    --no-skip           Do not skip files which have already been uploaded
+    --parallel <number>     Number of parallel uploads [default: 4]
+    --test                  Disable skip, resume, and complete functionality
 """
 
 import boto
 import functools
 import gevent
 import math
-import multiprocessing
 import os
 
 from boto.s3.multipart import MultiPartUpload
@@ -42,6 +40,7 @@ class UploadCommand(Command):
 
         path = self.settings['path']
         version_id = self.settings['version_id']
+        max_parallel_uploads = int(options['--parallel'])
 
         print 'Querying upload credentials...'
         credentials = self.api.get_upload_credentials(version_id)
@@ -51,13 +50,13 @@ class UploadCommand(Command):
         bucket = self.get_bucket(credentials)
         keys = []
 
-        if not options['--no-skip']:
+        if not options['--test']:
             print 'Querying existing objects...'
             keys = list(bucket.list(prefix))
 
         multipart_uploads = []
 
-        if not options['--no-resume']:
+        if not options['--test']:
             print 'Querying multipart uploads...'
             multipart_uploads = list(bucket.list_multipart_uploads())
 
@@ -91,9 +90,10 @@ class UploadCommand(Command):
                     multipart = bucket.initiate_multipart_upload(key_name)
 
                 # Let the class handle the multipart upload
-                ParallelUpload(credentials, key_name, multipart.id, local_path, relative_path).upload()
+                ParallelUpload(credentials, key_name, multipart.id, local_path, relative_path,
+                               max_parallel_uploads).upload()
 
-        if not options['--no-complete']:
+        if not options['--test']:
             self.api.complete_upload(version_id)
 
         print 'Upload complete.'
@@ -150,7 +150,7 @@ class ParallelUpload(object):
     This class handles uploading a file using the S3 multipart upload capabilities
     It uses gevent/greenlets to do parallel uploading of the chunks
     """
-    def __init__(self, credentials, key_name, multipart_id, path, relative_path):
+    def __init__(self, credentials, key_name, multipart_id, path, relative_path, max_parallel_uploads):
         """
         Initializes the multipart upload
 
@@ -159,6 +159,7 @@ class ParallelUpload(object):
         @type multipart_id str
         @type path str
         @type relative_path str
+        @type max_parallel_uploads int
         """
         file_size = os.path.getsize(path)
 
@@ -167,6 +168,7 @@ class ParallelUpload(object):
         self.__credentials = credentials
         self.__file_size = file_size
         self.__key_name = key_name
+        self.__max_parallel_uploads = max_parallel_uploads
         self.__multipart_id = multipart_id
         self.__path = path
         self.__progress = [0] * self.__chunk_count
@@ -240,9 +242,7 @@ class ParallelUpload(object):
         parts = multipart.get_all_parts()
 
         # Use a pool to limit the number of parallel uploads
-        cpu_count = multiprocessing.cpu_count()
-        workers = cpu_count * 2 if cpu_count > 1 else 4
-        pool = Pool(size=workers)
+        pool = Pool(size=self.__max_parallel_uploads)
 
         for i in range(self.__chunk_count):
             part_number = i + 1
