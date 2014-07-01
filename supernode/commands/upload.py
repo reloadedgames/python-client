@@ -124,7 +124,7 @@ class UploadCommand(Command):
             size = 1
 
         global progress
-        widgets = [Percentage(), ' ', NameWidget(name), ' ', FileTransferSpeed(), ' ', ETA()]
+        widgets = [Percentage(), ' ', NameWidget(name), ' ', FileTransferSpeed(), ' ', ETA(), ' ']
         progress = ProgressBar(widgets=widgets, maxval=size)
         progress.start()
 
