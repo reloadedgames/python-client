@@ -21,6 +21,7 @@ gevent.monkey.patch_all()
 
 from commands.config import ConfigCommand
 from commands.create import CreateCommand
+from commands.tag import TagCommand
 from commands.update import UpdateCommand
 from commands.upload import UploadCommand
 from docopt import docopt
@@ -36,6 +37,8 @@ def main():
         command = ConfigCommand()
     elif command_name == 'create':
         command = CreateCommand()
+    elif command_name == 'tag':
+        command = TagCommand()
     elif command_name == 'update':
         command = UpdateCommand()
     elif command_name == 'upload':

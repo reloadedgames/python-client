@@ -150,7 +150,6 @@ class RestApi:
         @type version_id str
         @rtype: dict
         """
-
         url = '{0}/versions/{1}/upload-credentials'.format(self.url, version_id)
         response = requests.get(url, auth=self.auth(), verify=self.verify)
 
@@ -158,3 +157,47 @@ class RestApi:
             raise Exception('Failure querying upload credentials')
 
         return response.json()
+
+    def get_tags(self, package_id):
+        """
+        Returns all of the tags available for the package
+
+        @type package_id str
+        @rtype: list of str
+        """
+        url = '{0}/packages/{1}'.format(self.url, package_id)
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure querying package tags')
+
+        for tag in response.json()['Tags']:
+            yield tag
+
+    def set_tag(self, package_id, tag, version_id):
+        """
+        Sets the specified package tag
+
+        @type package_id str
+        @type tag str
+        @type version_id str
+        """
+        url = '{0}/packages/{1}/tags/{2}'.format(self.url, package_id, tag)
+        parameters = {'VersionId': version_id}
+        response = requests.put(url, parameters, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure setting package tag')
+
+    def remove_tag(self, package_id, tag):
+        """
+        Removes the specified package tag
+
+        @type package_id str
+        @type tag str
+        """
+        url = '{0}/packages/{1}/tags/{2}'.format(self.url, package_id, tag)
+        response = requests.delete(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure deleting package tag')
