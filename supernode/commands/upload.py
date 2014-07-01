@@ -12,12 +12,12 @@ Options:
 
 import boto
 import functools
-import gevent
 import math
 import os
+import sys
 
+from concurrent.futures import ThreadPoolExecutor
 from boto.s3.multipart import MultiPartUpload
-from gevent.pool import Pool
 from progressbar import ETA, FileTransferSpeed, Percentage, ProgressBar, WidgetHFill
 from supernode.command import Command
 
@@ -174,6 +174,7 @@ class ParallelUpload(object):
         self.__progress = [0] * self.__chunk_count
         self.__relative_path = relative_path
         self.__progress_bar = UploadCommand.create_progress_bar(self.__relative_path, file_size)
+        self.__cancel = False
 
     def _get_multipart(self):
         """
@@ -198,13 +199,17 @@ class ParallelUpload(object):
         """
         multipart = self._get_multipart()
 
-        with open(self.__path, 'rb') as f:
-            f.seek(offset)
+        try:
+            with open(self.__path, 'rb') as f:
+                f.seek(offset)
 
-            multipart.upload_part_from_file(f, part_number,
-                                            cb=functools.partial(self._update_progress, part_number),
-                                            num_cb=100,
-                                            size=size)
+                multipart.upload_part_from_file(f, part_number,
+                                                cb=functools.partial(self._update_progress, part_number),
+                                                num_cb=100,
+                                                size=size)
+        except KeyboardInterrupt:
+            self.__cancel = True
+            exit()
 
     def _update_progress(self, part_number, current, total):
         """
@@ -214,6 +219,9 @@ class ParallelUpload(object):
         @type current int
         @type total int
         """
+        if self.__cancel:
+            exit()
+
         self.__progress[part_number - 1] = current
         sum_current = sum(self.__progress)
 
@@ -226,13 +234,9 @@ class ParallelUpload(object):
         if self.__file_size > MAXIMUM_COPY_SIZE:
             return
 
-        def copy_key(credentials, key_name):
-            bucket = UploadCommand.get_bucket(credentials)
-            key = bucket.get_key(key_name)
-            bucket.copy_key(key.name, bucket.name, key.name, metadata=key.metadata)
-
-        gevent.spawn(copy_key, self.__credentials, self.__key_name)
-        gevent.sleep()
+        bucket = UploadCommand.get_bucket(self.__credentials)
+        key = bucket.get_key(self.__key_name)
+        bucket.copy_key(key.name, bucket.name, key.name, metadata=key.metadata)
 
     def upload(self):
         """
@@ -242,7 +246,8 @@ class ParallelUpload(object):
         parts = multipart.get_all_parts()
 
         # Use a pool to limit the number of parallel uploads
-        pool = Pool(size=self.__max_parallel_uploads)
+        pool = ThreadPoolExecutor(max_workers=self.__max_parallel_uploads)
+        futures = []
 
         for i in range(self.__chunk_count):
             part_number = i + 1
@@ -254,9 +259,19 @@ class ParallelUpload(object):
                 self.__progress_bar.maxval -= part_size
                 continue
 
-            pool.spawn(self._upload_part, part_number, offset, part_size)
+            futures.append(pool.submit(self._upload_part, part_number, offset, part_size))
 
-        pool.join()
+        try:
+            # We must provide a timeout to be able to interrupt the threads
+            for f in futures:
+                f.result(timeout=sys.maxint)
+                
+        except KeyboardInterrupt:
+            self.__cancel = True
+            pool.shutdown()
+            print ''
+            exit('Upload canceled!')
+
         self.__progress_bar.finish()
         multipart.complete_upload()
         self._copy_key()
