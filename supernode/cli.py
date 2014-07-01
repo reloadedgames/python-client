@@ -7,11 +7,11 @@ Usage:
     supernode -h | --help
 
 Commands:
-    complete    Sets the newly created version as the current package version
     config      Collects configuration information needed to use other commands
     create      Creates a new package
+    tag         Updates the specified version tag for a package
     update      Updates an existing package with a new version
-    upload      Uploads package contents to the SFTP infrastructure
+    upload      Uploads the package contents to the S3 origin bucket
 """
 
 # This must be first so it can replace the built-in http/url methods

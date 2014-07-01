@@ -106,11 +106,11 @@ Usage:
     supernode -h | --help
 
 Commands:
-    complete    Sets the newly created version as the current package version
     config      Collects configuration information needed to use other commands
     create      Creates a new package
+    tag         Updates the specified version tag for a package
     update      Updates an existing package with a new version
-    upload      Uploads package contents to the SFTP infrastructure
+    upload      Uploads the package contents to the S3 origin bucket
 ```
 
 Each command will also provide its own help:
@@ -182,22 +182,25 @@ VersionId = 5255da8e35edd10a8809c8df
 
 The package and version information is automatically saved in your configuration after executing the command.
 
-Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
+Now that the package has been created, its files must be uploaded to the S3 origin bucket:
 
 ```bash
 $ supernode upload
-Querying upload settings...
-Connecting to server...
+Querying upload credentials...
+Connecting to S3 bucket...
+Querying existing objects...
+Querying multipart uploads...
 Uploading files...
-  Installer.bin - 100%
-  Installer.exe - 100%
+100% Installer.bin                                    637.62 kB/s Time: 0:14:01
+100% Installer.exe                                     23.65 kB/s Time: 0:00:00
+Upload complete.
 ```
 
-Once the package files have been uploaded, you can then set the current version of the package:
+Once the package files have been uploaded, you can then set the current version tag of the package:
 
 ```bash
-$ supernode complete
-Updating the current package version to 5255da8e35edd10a8809c8df...
+$ supernode tag --tag current
+Setting package tag...
 ```
 
 ## Updating a Package
@@ -208,7 +211,7 @@ You follow the same previous steps:
 - Configure the environment (optional)
 - Update the package
 - Upload the files
-- Set the current package version
+- Set the current package tag
 
 Updating a package takes almost the same arguments as creating a package:
 
