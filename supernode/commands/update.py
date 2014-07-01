@@ -39,9 +39,9 @@ class UpdateCommand(Command):
 
         # Read the package files and calculate their checksums
         print 'Processing package files...'
-        path = options['--path']
+        path_absolute = os.path.abspath(options['--path'])
         chunk_size = int(options['--chunk-size'])
-        package_files = self.chunk_files(path, chunk_size)
+        package_files = self.chunk_files(path_absolute, chunk_size)
 
         if not package_files:
             exit('The package directory contains no files')
@@ -49,7 +49,6 @@ class UpdateCommand(Command):
         # Create the version
         print 'Creating new version...'
         arguments = options['--arguments']
-        path_absolute = os.path.abspath(path)
 
         # Run is optional
         if options['--run'] is not None:
