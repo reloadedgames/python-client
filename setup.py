@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='supernode',
-    version='1.0.5.2',
+    version='1.0.6',
     description='Python command-line client for creating and managing super node packages',
     install_requires=[
         'boto == 2.29.1',

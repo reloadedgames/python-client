@@ -6,9 +6,7 @@ Python versions 2.6 and 2.7 are supported.
 
 **Installation**
 
-* [Compatibility Testing](#compatibility-testing)
-* [Linux Installation](#linux-installation)
-* [Windows Installation](#windows-installation)
+* [Installation](#installation)
 
 **Usage**
 
@@ -17,34 +15,9 @@ Python versions 2.6 and 2.7 are supported.
 * [Updating a Package](#updating-a-package)
 
 
-## Compatibility Testing
+## Installation
 
-|Status|Operating System|Python Version(s)|Notes|
-|:----:|:---------------|:----------------|:----|
-|:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
-|:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
-|:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Use the `config --insecure` option to disable HTTPS verification.|
-|:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
-|:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
-|:white_check_mark:|Windows 7|2.6.6, 2.7.5||
-
-## Linux Installation
-
-Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
-C library. Other packages (such as git and pip) aren't required but are used to ease installation.
-
-Depending on your distribution, execute the appropriate command(s):
-
-|Distribution|Command|
-|:-----------|:-------|
-|Amazon AMI|`yum install -y gcc git python2-devel python-setuptools python-pip`|
-|CentOS|`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
-|Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
-|OpenSUSE|`zypper in -y gcc git python-devel python-setuptools`<br>`easy_install pip`|
-|Red Hat|`yum erase -y python-paramiko python-crypto`<br>`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
-
-After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
+Clone the client's repository using [git](http://git-scm.com/):
 
 ```bash
 $ git clone https://github.com/reloadedgames/python-client.git
@@ -54,39 +27,6 @@ After cloning has finished, install the program using [pip](http://www.pip-insta
 
 ```bash
 $ pip install ./python-client
-```
-
-Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
-
-## Windows Installation
-
-Download and install the latest Python 2.7 for Windows release:
-
-- [Download Python](http://www.python.org/getit/)
-
-Download and install the setuptools and pip modules:
-
-- [Setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
-- [Pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)
-
-Add both the Python root installation folder (`C:\Python27\`) and its scripts folder (`C:\Python27\Scripts\`)
-to your environment path variable. This will allow you to access the python and pip commands easily.
-
-Download and install the pre-built version of the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
-library for your specific Python/Windows environment:
-
-- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
-
-Assuming you have [git](http://git-scm.com/) installed, clone the client repository:
-
-```bat
-C:\> git clone https://github.com/reloadedgames/python-client.git
-```
-
-Once cloned, install the client using [pip](http://www.pip-installer.org/):
-
-```bat
-C:\> pip install ./python-client
 ```
 
 Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
