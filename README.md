@@ -77,7 +77,7 @@ $ git clone https://github.com/reloadedgames/python-client.git
 After cloning has finished, install the program using [pip](http://www.pip-installer.org/):
 
 ```bash
-$ pip install ./python-client
+$ sudo pip install ./python-client
 ```
 
 Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
