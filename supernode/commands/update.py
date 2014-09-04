@@ -36,6 +36,12 @@ class UpdateCommand(Command):
         if package_id is None:
             exit('No package specified')
 
+        # Validate package belongs to configured partner
+        package = self.api.get_package(package_id)
+
+        if package['PartnerId'] != self.settings['partner_id']:
+            exit('The specified package does not belong to the currently configured partner')
+
         # Read the package files and calculate their checksums
         print 'Processing package files...'
         path_absolute = os.path.abspath(options['--path'])

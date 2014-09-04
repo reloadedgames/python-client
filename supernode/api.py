@@ -198,3 +198,18 @@ class RestApi:
 
         if response.status_code != 200:
             raise Exception('Failure setting package version')
+
+    def get_package(self, package_id):
+        """
+        Queries and returns the specified package
+
+        @type package_id: str
+        @rtype : dict
+        """
+        url = '{0}/packages/{1}'.format(self.url, package_id)
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure querying package')
+
+        return response.json()
