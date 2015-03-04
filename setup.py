@@ -2,12 +2,13 @@ from setuptools import find_packages, setup
 
 setup(
     name='supernode',
-    version='1.0.7',
+    version='1.0.8',
     description='Python command-line client for creating and managing super node packages',
     install_requires=[
+        'boto == 2.29.1',
         'docopt == 0.6.1',
-        'paramiko == 1.12.0',
-        'pycrypto >= 2.6',
+        'futures == 2.1.6',
+        'progressbar2 == 2.6.2',
         'requests >= 2.0'
     ],
     packages=find_packages(),

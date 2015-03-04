@@ -6,10 +6,7 @@ Python versions 2.6 and 2.7 are supported.
 
 **Installation**
 
-* [Compatibility Testing](#compatibility-testing)
-* [Linux Installation](#linux-installation)
-* [OS X Installation](#osx-installation)
-* [Windows Installation](#windows-installation)
+* [Installation](#installation)
 
 **Usage**
 
@@ -18,55 +15,7 @@ Python versions 2.6 and 2.7 are supported.
 * [Updating a Package](#updating-a-package)
 
 
-## Compatibility Testing
-
-|Status|Operating System|Python Version(s)|Notes|
-|:----:|:---------------|:----------------|:----|
-|:white_check_mark:|Amazon Linux AMI 2013.09|2.6.8||
-|:white_check_mark:|CentOS 6 - 2013-05-27|2.6.6||
-|:white_check_mark:|OS X Mavericks (10.9)|2.7.5|Using pre-installed OS X python|
-|:white_check_mark:|Red Hat Enterprise Linux 6.4|2.6.6||
-|:white_check_mark:|SUSE Linux Enterprise Server 11 SP3|2.6.8|Use the `config --insecure` option to disable HTTPS verification.|
-|:white_check_mark:|Ubuntu Server 12.04.2 LTS|2.7.3||
-|:white_check_mark:|Ubuntu Server 13.04|2.6.8, 2.7.4||
-|:white_check_mark:|Windows 7|2.6.6, 2.7.5||
-
-## Linux Installation
-
-Some operating system packages are required to compile the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
-C library. Other packages (such as git and pip) aren't required but are used to ease installation.
-
-Depending on your distribution, execute the appropriate command(s):
-
-|Distribution|Command|
-|:-----------|:-------|
-|Amazon AMI|`yum install -y gcc git python2-devel python-setuptools python-pip`|
-|CentOS|`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
-|Debian, Ubuntu|`apt-get install -y gcc git python-dev python-pip`|
-|OpenSUSE|`zypper in -y gcc git python-devel python-setuptools`<br>`easy_install pip`|
-|Red Hat|`yum erase -y python-paramiko python-crypto`<br>`yum install -y gcc git python2-devel python-setuptools`<br>`easy_install pip`|
-
-After installing the required packages, clone the client's repository using [git](http://git-scm.com/):
-
-```bash
-$ git clone https://github.com/reloadedgames/python-client.git
-```
-
-After cloning has finished, install the program using [pip](http://www.pip-installer.org/):
-
-```bash
-$ pip install ./python-client
-```
-
-Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
-
-## OS X Installation
-
-Install pip and requests using easy_install (provided by default on OS X):
-
-```bash
-$ sudo easy_install --upgrade pip requests
-```
+## Installation
 
 Clone the client's repository using [git](http://git-scm.com/):
 
@@ -77,41 +26,7 @@ $ git clone https://github.com/reloadedgames/python-client.git
 After cloning has finished, install the program using [pip](http://www.pip-installer.org/):
 
 ```bash
-$ sudo pip install ./python-client
-```
-
-Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
-
-
-## Windows Installation
-
-Download and install the latest Python 2.7 for Windows release:
-
-- [Download Python](http://www.python.org/getit/)
-
-Download and install the setuptools and pip modules:
-
-- [Setuptools](http://www.lfd.uci.edu/~gohlke/pythonlibs/#setuptools)
-- [Pip](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip)
-
-Add both the Python root installation folder (`C:\Python27\`) and its scripts folder (`C:\Python27\Scripts\`)
-to your environment path variable. This will allow you to access the python and pip commands easily.
-
-Download and install the pre-built version of the [PyCrypto](https://pypi.python.org/pypi/pycrypto)
-library for your specific Python/Windows environment:
-
-- [Voicespace Python Modules](http://www.voidspace.org.uk/python/modules.shtml#pycrypto)
-
-Assuming you have [git](http://git-scm.com/) installed, clone the client repository:
-
-```bat
-C:\> git clone https://github.com/reloadedgames/python-client.git
-```
-
-Once cloned, install the client using [pip](http://www.pip-installer.org/):
-
-```bat
-C:\> pip install ./python-client
+$ pip install ./python-client
 ```
 
 Once installed, the client will automatically be added to your path and can be run using the `supernode` command.
@@ -131,11 +46,11 @@ Usage:
     supernode -h | --help
 
 Commands:
-    complete    Sets the newly created version as the current package version
     config      Collects configuration information needed to use other commands
     create      Creates a new package
+    tag         Updates the specified version tag for a package
     update      Updates an existing package with a new version
-    upload      Uploads package contents to the SFTP infrastructure
+    upload      Uploads the package contents to the S3 origin bucket
 ```
 
 Each command will also provide its own help:
@@ -207,22 +122,25 @@ VersionId = 5255da8e35edd10a8809c8df
 
 The package and version information is automatically saved in your configuration after executing the command.
 
-Now that the package has been created, its files must be uploaded to the SFTP infrastructure:
+Now that the package has been created, its files must be uploaded to the S3 origin bucket:
 
 ```bash
 $ supernode upload
-Querying upload settings...
-Connecting to server...
+Querying upload credentials...
+Connecting to S3 bucket...
+Querying existing objects...
+Querying multipart uploads...
 Uploading files...
-  Installer.bin - 100%
-  Installer.exe - 100%
+100% Installer.bin                                    637.62 kB/s Time: 0:14:01
+100% Installer.exe                                     23.65 kB/s Time: 0:00:00
+Upload complete.
 ```
 
-Once the package files have been uploaded, you can then set the current version of the package:
+Once the package files have been uploaded, you can then set the current version tag of the package:
 
 ```bash
-$ supernode complete
-Updating the current package version to 5255da8e35edd10a8809c8df...
+$ supernode tag --tag current
+Setting package tag...
 ```
 
 ## Updating a Package
@@ -233,7 +151,7 @@ You follow the same previous steps:
 - Configure the environment (optional)
 - Update the package
 - Upload the files
-- Set the current package version
+- Set the current package tag
 
 Updating a package takes almost the same arguments as creating a package:
 

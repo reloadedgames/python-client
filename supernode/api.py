@@ -99,7 +99,7 @@ class RestApi:
 
         return response.json()
 
-    def add_file(self, version_id, path, size, chunk_size, checksums):
+    def add_file(self, version_id, path, size, chunk_size, checksums, md5):
         """
         Adds the file to the package version
 
@@ -112,6 +112,8 @@ class RestApi:
         @param chunk_size: The size of each file chunk
         @type chunk_size: long
         @param checksums: A list of checksum values
+        @param md5: The MD5 hex of the file
+        @type md5: str
         @type checksums: list
 
         """
@@ -119,6 +121,7 @@ class RestApi:
         parameters = {
             'Checksums': ','.join(str(i) for i in checksums),
             'Chunk': chunk_size,
+            'MD5': md5,
             'Path': path,
             'Size': size
         }
@@ -128,76 +131,76 @@ class RestApi:
         if response.status_code != 200:
             raise Exception('Failure adding file')
 
-    def complete_version(self, version_id):
+    def complete_upload(self, version_id):
         """
-        Marks the version as complete after all of the files have been added
+        Marks the version as completely uploaded
 
-        @param version_id: The primary key of the version
-        @type version_id: str
+        @type version_id str
         """
-        url = '{0}/versions/{1}/complete'.format(self.url, version_id)
+        url = '{0}/versions/{1}/upload-complete'.format(self.url, version_id)
         response = requests.post(url, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure completing version')
 
-    def get_upload_settings(self, partner_id):
+    def get_upload_credentials(self, version_id):
         """
-        Pulls the upload settings from the REST API
+        Returns the upload credentials for the version
 
-        @param partner_id: The primary key of the partner
-        @type partner_id: str
-        @rtype : dict
+        @type version_id str
+        @rtype: dict
         """
-        response = requests.get('{0}/settings/upload'.format(self.url), verify=self.verify)
-
-        if response.status_code != 200:
-            raise Exception('Failure querying upload settings')
-
-        json = response.json()
-
-        return {
-            'host': json['Host'],
-            'port': int(json['Port']),
-            'fingerprint': json['Fingerprints']['DSA'],
-            'username': partner_id,
-            'private_key': self.get_private_key(partner_id)
-        }
-
-    def get_private_key(self, partner_id):
-        """
-        Queries the private key for the partner from the REST API
-
-        @param partner_id: The primary key of the partner
-        @type partner_id: str
-        @rtype : str
-        """
-        url = '{0}/partners/{1}/private-key'.format(self.url, partner_id)
+        url = '{0}/versions/{1}/upload-credentials'.format(self.url, version_id)
         response = requests.get(url, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
-            raise Exception('Failure querying private key')
+            raise Exception('Failure querying upload credentials')
 
-        return response.content
+        return response.json()
 
-    def set_version(self, package_id, version_id):
+    def get_tags(self, package_id):
         """
-        Sends the API request updating the package version
+        Returns all of the tags available for the package
 
-        @param package_id: The primary key of the package
-        @type package_id: str
-        @param version_id: The primary key of the version
-        @type version_id: string
+        @type package_id str
+        @rtype: list of str
         """
         url = '{0}/packages/{1}'.format(self.url, package_id)
-        parameters = {
-            'VersionId': version_id
-        }
+        response = requests.get(url, auth=self.auth(), verify=self.verify)
 
+        if response.status_code != 200:
+            raise Exception('Failure querying package tags')
+
+        for tag in response.json()['Tags']:
+            yield tag
+
+    def set_tag(self, package_id, tag, version_id):
+        """
+        Sets the specified package tag
+
+        @type package_id str
+        @type tag str
+        @type version_id str
+        """
+        url = '{0}/packages/{1}/tags/{2}'.format(self.url, package_id, tag)
+        parameters = {'VersionId': version_id}
         response = requests.put(url, parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
-            raise Exception('Failure setting package version')
+            raise Exception('Failure setting package tag')
+
+    def remove_tag(self, package_id, tag):
+        """
+        Removes the specified package tag
+
+        @type package_id str
+        @type tag str
+        """
+        url = '{0}/packages/{1}/tags/{2}'.format(self.url, package_id, tag)
+        response = requests.delete(url, auth=self.auth(), verify=self.verify)
+
+        if response.status_code != 200:
+            raise Exception('Failure deleting package tag')
 
     def get_package(self, package_id):
         """

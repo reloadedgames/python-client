@@ -7,16 +7,16 @@ Usage:
     supernode -h | --help
 
 Commands:
-    complete    Sets the newly created version as the current package version
     config      Collects configuration information needed to use other commands
     create      Creates a new package
+    tag         Updates the specified version tag for a package
     update      Updates an existing package with a new version
-    upload      Uploads package contents to the SFTP infrastructure
+    upload      Uploads the package contents to the S3 origin bucket
 """
 
-from commands.complete import CompleteCommand
 from commands.config import ConfigCommand
 from commands.create import CreateCommand
+from commands.tag import TagCommand
 from commands.update import UpdateCommand
 from commands.upload import UploadCommand
 from docopt import docopt
@@ -28,12 +28,12 @@ def main():
     command = None
     options = [command_name] + args['<args>']
 
-    if command_name == 'complete':
-        command = CompleteCommand()
-    elif command_name == 'config':
+    if command_name == 'config':
         command = ConfigCommand()
     elif command_name == 'create':
         command = CreateCommand()
+    elif command_name == 'tag':
+        command = TagCommand()
     elif command_name == 'update':
         command = UpdateCommand()
     elif command_name == 'upload':
