@@ -54,7 +54,7 @@ class RestApi:
             'Type': package_type
         }
 
-        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
+        response = requests.post(url, data=parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure creating package')
@@ -92,7 +92,7 @@ class RestApi:
             if parameters[key] is not None:
                 headers = None
 
-        response = requests.post(url, parameters, headers=headers, auth=self.auth(), verify=self.verify)
+        response = requests.post(url, data=parameters, headers=headers, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure creating version')
@@ -126,7 +126,7 @@ class RestApi:
             'Size': size
         }
 
-        response = requests.post(url, parameters, auth=self.auth(), verify=self.verify)
+        response = requests.post(url, data=parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure adding file')
@@ -184,7 +184,7 @@ class RestApi:
         """
         url = '{0}/packages/{1}/tags/{2}'.format(self.url, package_id, tag)
         parameters = {'VersionId': version_id}
-        response = requests.put(url, parameters, auth=self.auth(), verify=self.verify)
+        response = requests.put(url, data=parameters, auth=self.auth(), verify=self.verify)
 
         if response.status_code != 200:
             raise Exception('Failure setting package tag')
